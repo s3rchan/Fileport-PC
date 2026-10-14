@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101b2a">
+  <title>Yakın — Dosya Paylaşımı</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar"><a class="brand" href="/" aria-label="Yakın ana sayfa"><span class="brand-mark">Y</span><span>yakın<span class="brand-dot">.</span></span></a><span class="top-note">Doğrudan cihazdan cihaza</span></header>
+    <section class="hero">
+      <div class="eyebrow"><span class="live-dot"></span> Özel ve doğrudan aktarım</div>
+      <h1>Dosyaların,<br><em>aradaki mesafeyi</em> kapatsın.</h1>
+      <p class="intro">Bir oda aç, altı haneli kodu paylaş ve dosyalarını başka bir cihaza gönder. Dosyalar aktarım sırasında bu sunucudan geçmez.</p>
+    </section>
+
+    <section class="workspace" aria-label="Dosya paylaşım odası">
+      <div class="room-card" id="roomCard">
+        <div class="card-heading"><div><span class="step">01 / ODA</span><h2>Bir bağlantı kur</h2></div><div class="connection-badge" id="connectionBadge"><span class="badge-dot"></span><span id="connectionText">Hazır</span></div></div>
+        <div class="room-actions" id="roomActions">
+          <button class="button button-primary" id="createRoom">Yeni oda oluştur <span aria-hidden="true">↗</span></button>
+          <span class="or">veya</span>
+          <div class="join-form"><label class="visually-hidden" for="roomCode">6 haneli oda kodu</label><input id="roomCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="ODA KODU"><button class="button button-outline" id="joinRoom">Odaya katıl</button></div>
+        </div>
+        <div class="room-active hidden" id="roomActive">
+          <div><span class="muted-label">ODA KODUN</span><div class="code-display" id="activeCode">------</div></div>
+          <button class="copy-button" id="copyCode" aria-label="Oda kodunu kopyala">Kodu kopyala <span>⧉</span></button>
+          <button class="leave-button" id="leaveRoom">Odadan ayrıl</button>
+        </div>
+        <div class="status-line" id="roomStatus" role="status" aria-live="polite">Başlamak için oda oluştur veya bir kod gir.</div>
+      </div>
+
+      <div class="transfer-grid">
+        <section class="transfer-card send-card">
+          <div class="card-heading"><div><span class="step">02 / GÖNDER</span><h2>Dosya seç</h2></div><span class="card-icon">↑</span></div>
+          <label class="dropzone" id="dropzone" for="fileInput"><span class="upload-icon">↑</span><strong>Dosyaları buraya bırak</strong><span>ya da <u>cihazından seç</u></span><small>Birden fazla dosya seçebilirsin</small><input id="fileInput" type="file" multiple></label>
+          <div class="file-list hidden" id="fileList"></div>
+          <button class="button button-primary send-button" id="sendFiles" disabled>Dosyaları gönder <span aria-hidden="true">→</span></button>
+          <div class="progress-wrap hidden" id="sendProgressWrap"><div class="progress-caption"><span id="sendProgressLabel">Gönderiliyor…</span><span id="sendProgressValue">0%</span></div><div class="progress-track"><div class="progress-fill" id="sendProgressFill"></div></div></div>
+        </section>
+
+        <section class="transfer-card receive-card">
+          <div class="card-heading"><div><span class="step">03 / AL</span><h2>Gelen dosyalar</h2></div><span class="card-icon receive-icon">↓</span></div>
+          <div class="receive-empty" id="receiveEmpty"><div class="receive-illustration"><span>↓</span></div><strong>Almaya hazır</strong><p>Diğer cihaz bir dosya gönderdiğinde burada görünür.</p></div>
+          <div class="incoming hidden" id="incoming"><div class="incoming-name" id="incomingName">Dosya alınıyor</div><div class="progress-caption"><span id="receiveProgressLabel">Hazırlanıyor…</span><span id="receiveProgressValue">0%</span></div><div class="progress-track"><div class="progress-fill receive-fill" id="receiveProgressFill"></div></div></div>
+          <div class="received-list" id="receivedList"></div>
+          <div class="privacy-note"><span>◇</span><span>Dosyalar uçtan uca şifreli WebRTC bağlantısıyla aktarılır. Oda sunucusu dosya içeriğini görmez.</span></div>
+        </section>
+      </div>
+    </section>
+    <footer><span>YAKIN · CİHAZDAN CİHAZA</span><span id="limitNote">Dosyalar doğrudan aktarılır.</span></footer>
+  </main>
+  <div class="toast hidden" id="toast" role="status"></div>
+</body>
+</html>
