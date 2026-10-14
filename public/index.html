@@ -6,13 +6,13 @@
   <meta name="theme-color" content="#f5f7fb">
   <title>Yakın — Dosya Paylaşımı</title>
   <link rel="stylesheet" href="/styles.css">
-  <script src="/app.js" defer></script>
+  <script src="/app.js" defer></script><script src="/cloud.js" defer></script>
 </head>
 <body>
   <main class="shell">
     <header class="topbar"><a class="brand" href="/" aria-label="Yakın ana sayfa"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span><b>yakın</b><small>GÜVENLİ DOSYA TRANSFERİ</small></span></a><span class="top-note"><span class="offline-dot"></span> Güvenli P2P bağlantısı</span></header>
     <section class="hero">
-      <div class="eyebrow"><span class="live-dot"></span> KURUMSAL DOSYA PAYLAŞIM PLATFORMU</div>
+      <div class="eyebrow"><span class="live-dot"></span> HIZLI VE KOLAY DOSYA PAYLAŞIMI</div>
       <h1>Dosyalarınızı güvenle<br><em>paylaşın.</em></h1>
       <p class="intro">Hesap oluşturmadan, yalnızca altı haneli oda koduyla cihazlar arasında hızlı ve doğrudan dosya aktarımı.</p>
     </section>
@@ -47,9 +47,13 @@
           <div class="receive-empty" id="receiveEmpty"><div class="receive-illustration"><span>↓</span></div><strong>Almaya hazır</strong><p>Diğer cihaz bir dosya gönderdiğinde burada görünür.</p></div>
           <div class="incoming hidden" id="incoming"><div class="incoming-name" id="incomingName">Dosya alınıyor</div><div class="progress-caption"><span id="receiveProgressLabel">Hazırlanıyor…</span><span id="receiveProgressValue">0%</span></div><div class="progress-track"><div class="progress-fill receive-fill" id="receiveProgressFill"></div></div></div>
           <div class="received-list" id="receivedList"></div>
-          <div class="privacy-note"><span>◇</span><span>Dosyalar uçtan uca şifreli WebRTC bağlantısıyla aktarılır. Oda sunucusu dosya içeriğini görmez.</span></div>
+          <div class="privacy-note"><span>◇</span><span>Bu bölümde dosyalar WebRTC ile doğrudan aktarılır; kalıcı bağlantı bölümündeki dosyalar ise sunucuda saklanır.</span></div>
         </section>
       </div>
+    </section>
+    <section class="cloud-panel" aria-label="Kalıcı dosya paylaşımı">
+      <div class="cloud-copy"><span class="step">04 / BAĞLANTIYLA PAYLAŞ</span><h2>Kalıcı dosya bağlantısı</h2><p>Dosyanı sunucuya yükle, paylaşılabilir bir indirme bağlantısı oluştur. Alıcının aynı anda çevrimiçi olması gerekmez.</p></div>
+      <div class="cloud-controls"><input type="file" id="cloudFile" aria-label="Sunucuya yüklenecek dosya"><button class="button button-primary" id="cloudUpload">Yükle ve bağlantı oluştur</button><div class="cloud-status" id="cloudStatus" role="status"></div><div id="cloudResult" class="cloud-result hidden"><input id="cloudLink" readonly aria-label="Paylaşım bağlantısı"><button class="button button-outline" id="cloudCopy">Kopyala</button></div></div>
     </section>
     <footer><span>© 2026 YAKIN · DOSYA TRANSFER PLATFORMU</span><span id="limitNote">Dosyalar doğrudan aktarılır.</span></footer>
   </main>

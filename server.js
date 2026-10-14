@@ -18,8 +18,41 @@ function iceServers() {
   return servers;
 }
 
+const STORE = path.resolve(process.env.UPLOAD_DIR || path.join(__dirname, 'uploads'));
+const CLOUD_LIMIT = Math.max(1, Number(process.env.CLOUD_MAX_MB || 100)) * 1024 * 1024;
+fs.mkdirSync(STORE, { recursive: true });
+const cleanFilename = name => String(name || 'dosya').replace(/[\x00-\x1f\x7f\\/<>:"|?*]/g, '_').slice(0, 160) || 'dosya';
+function cloudRequest(req, res, pathname) {
+  if (req.method === 'POST' && pathname === '/api/files') {
+    const declared = Number(req.headers['content-length'] || 0);
+    if (declared > CLOUD_LIMIT) { res.writeHead(413, {'Content-Type':'application/json'}).end(JSON.stringify({error:'Dosya boyutu sınırı aşıyor.'})); req.resume(); return true; }
+    let name;
+    try { name = cleanFilename(decodeURIComponent(req.headers['x-file-name'] || 'dosya')); } catch { name='dosya'; }
+    const id=crypto.randomBytes(20).toString('hex');
+    const target=path.join(STORE,id+'.bin'), meta=path.join(STORE,id+'.json');
+    const output=fs.createWriteStream(target,{flags:'wx',mode:0o600});
+    let size=0, failed=false;
+    const fail=(code,message)=>{if(failed)return;failed=true;req.unpipe(output);output.destroy();fs.rm(target,{force:true},()=>{});if(!res.headersSent)res.writeHead(code,{'Content-Type':'application/json'}).end(JSON.stringify({error:message}));req.resume();};
+    req.on('data',chunk=>{size+=chunk.length;if(size>CLOUD_LIMIT)fail(413,'Dosya boyutu sınırı aşıyor.');});
+    req.on('aborted',()=>fail(400,'Yükleme yarıda kesildi.'));
+    req.on('error',()=>fail(400,'Bağlantı hatası.'));
+    output.on('error',()=>fail(500,'Dosya kaydedilemedi.'));
+    output.on('finish',()=>{if(failed)return;try{fs.writeFileSync(meta,JSON.stringify({name,size,created:new Date().toISOString()}),{flag:'wx',mode:0o600});res.writeHead(201,{'Content-Type':'application/json','Cache-Control':'no-store'}).end(JSON.stringify({url:'/f/'+id}));}catch{fs.rm(target,{force:true},()=>{});res.writeHead(500,{'Content-Type':'application/json'}).end(JSON.stringify({error:'Kayıt başarısız.'}));}});
+    req.pipe(output);return true;
+  }
+  if(req.method==='GET' && /^\/f\/[a-f0-9]{40}$/.test(pathname)) {
+    const id=pathname.slice(3);let metadata,stat;
+    try{metadata=JSON.parse(fs.readFileSync(path.join(STORE,id+'.json'),'utf8'));stat=fs.statSync(path.join(STORE,id+'.bin'));}catch{res.writeHead(404).end('Dosya bulunamadı.');return true;}
+    const fallback=cleanFilename(metadata.name).replace(/["\r\n]/g,'_');
+    res.writeHead(200,{'Content-Type':'application/octet-stream','Content-Length':stat.size,'Content-Disposition':`attachment; filename="${fallback}"; filename*=UTF-8''${encodeURIComponent(metadata.name)}`,'X-Content-Type-Options':'nosniff','Cache-Control':'private, no-store'});
+    fs.createReadStream(path.join(STORE,id+'.bin')).pipe(res);return true;
+  }
+  if(pathname.startsWith('/api/')||pathname.startsWith('/f/')){res.writeHead(404).end('Not found');return true;}
+  return false;
+}
 const server = http.createServer((req, res) => {
   const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+  if (cloudRequest(req, res, pathname)) return;
   const requested = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '');
   const file = path.resolve(ROOT, requested);
   if (!file.startsWith(ROOT + path.sep) && file !== path.join(ROOT, 'index.html')) {

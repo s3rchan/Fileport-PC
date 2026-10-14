@@ -33,3 +33,8 @@ Numaralı oda koduyla iki tarayıcı arasında dosya paylaşmak için bağımsı
 ## Dağıtım
 
 Sunucuyu internete açarken TLS sonlandırması ekleyin, güvenlik duvarında HTTP(S) ile sinyalleşme erişimini ayarlayın ve TURN hizmetini yapılandırın. Oda kodu geçici eşleştirme içindir; kullanıcı kimlik doğrulaması sağlamaz.
+
+## Kalıcı dosya bağlantıları
+- Yeni bölüm dosyaları sunucuya kaydeder (`uploads/` veya `UPLOAD_DIR`). Dosya başına varsayılan sınır 100 MB; `CLOUD_MAX_MB` ile değiştirilebilir.
+- Linke sahip herkes indirebilir; erişim şifresi, hesap, virüs taraması ve otomatik silme henüz yoktur. Hassas dosyaları yüklemeyin.
+- Dosyalar sunucu diskinde tutulur; Render ücretsiz servis gibi geçici diskli barındırmada yeniden dağıtım/yeniden başlatma sonrası silinebilir. Gerçek kalıcılık için persistent disk veya nesne depolama bağlayın. Disk doluluğu ve kötüye kullanım için üretimde ek önlemler gerekir.
