@@ -33,3 +33,12 @@ Numaralı oda koduyla iki tarayıcı arasında dosya paylaşmak için bağımsı
 ## Dağıtım
 
 Sunucuyu internete açarken TLS sonlandırması ekleyin, güvenlik duvarında HTTP(S) ile sinyalleşme erişimini ayarlayın ve TURN hizmetini yapılandırın. Oda kodu geçici eşleştirme içindir; kullanıcı kimlik doğrulaması sağlamaz.
+
+
+## Yakın Flow v0.4
+- Altı haneli oda bağlantısında WebRTC üzerinden metin mesajları ve dosya kartları.
+- Cihaz adı paylaşımı, geçmişin yalnızca o cihazın localStorage alanında saklanması.
+- Dosyalar geçmişte saklanmaz; alındıktan sonra indirme bağlantısından kaydedilir.
+- Oda kodları GEÇİCİDİR. Kalıcı otomatik eşleştirme veya bulut sohbet senkronizasyonu henüz yoktur.
+- Cihazdan cihaza WebRTC aktarımları için iki tarafın da çevrimiçi olması, sunucunun `/signal` yolunun çalışması ve bazı ağlarda TURN sunucusu gerekir.
+- Bu kaynak proje derlenip gerçek cihazlarda test edilmelidir.

@@ -8,6 +8,10 @@ $('create').onclick=()=>{
  ws.onmessage=async ev=>{
   const m=JSON.parse(ev.data);
   if(m.type==='created'){$('code').textContent=m.code;ice=m.iceServers;$('status').textContent='Bu kodu Android uygulamasına girin.';$('stop').disabled=false;}
+  if(m.type==='screen-frame'){
+   const image=$('framePreview');
+   if(image){$('video').style.display='none';image.style.display='block';image.src='data:image/jpeg;base64,'+m.data;$('status').textContent='Telefon ekranı paylaşılıyor.';}
+  }
   if(m.type==='sender-joined'){$('status').textContent='Telefon bağlandı; ekran izni bekleniyor.';}
   if(m.type==='signal'){
    try{

@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#f5f7fb">
   <title>Yakın — Dosya Paylaşımı</title>
   <link rel="stylesheet" href="/styles.css">
-  <script src="/app.js" defer></script><script src="/cloud.js" defer></script>
+  <script src="/app.js" defer></script><script src="/flow.js" defer></script><script src="/cloud.js" defer></script>
 </head>
 <body>
   <main class="shell">
@@ -51,7 +51,16 @@
         </section>
       </div>
     </section>
-    <section class="cloud-panel" aria-label="Ekran yansıtma">
+    <section class="flow-panel" id="flowPanel" aria-label="Yakın Flow sohbet ve aktarım">
+  <div class="flow-header"><div class="flow-avatar">Y</div><div><span class="step">YAKIN FLOW</span><h2>Bağlantı ve sohbet</h2><p id="flowDeviceStatus">Cihaz bağlanınca sohbet burada başlayacak.</p></div><span class="flow-live" id="flowLive">● Çevrimdışı</span></div>
+  <div class="flow-pair"><label for="flowDeviceName">Bu cihazın adı</label><input id="flowDeviceName" maxlength="32" placeholder="Örn. Galaxy / Bilgisayar"><button class="button button-outline" id="flowSaveDevice" type="button">Cihaz adını kaydet</button></div>
+  <div class="flow-conversation" id="flowMessages" aria-live="polite"><div class="flow-empty">💬 Oda oluştur veya başka bir cihaza katıl. Bağlandığında mesaj ve dosyalar burada görünecek.</div></div>
+  <div class="flow-compose"><input id="flowText" maxlength="2000" aria-label="Mesaj" placeholder="Bir mesaj yaz..." autocomplete="off"><button id="flowSendText" class="button button-primary" type="button" disabled>Gönder ↗</button></div>
+  <div class="flow-tools"><button id="flowSelectFile" class="button button-outline" type="button">📎 Dosya seç</button><button id="flowSendFiles" class="button button-outline" type="button" disabled>Dosyaları gönder</button><button id="flowClearHistory" class="button button-outline" type="button">Geçmişi temizle</button></div>
+  <div class="flow-history"><h3>Son bağlantılar ve aktarım geçmişi</h3><div id="flowRecent" class="flow-recent"></div></div>
+  <div class="flow-disclaimer">Geçmiş bu cihazda saklanır. Gönderilen dosyaların kendisi geçmişte tutulmaz. Oda kodları geçicidir; yeniden bağlanmak için aktif oda gerekir.</div>
+</section>
+<section class="cloud-panel" aria-label="Ekran yansıtma">
       <div class="cloud-copy"><span class="step">EKRAN YANSITMA</span><h2>Telefon ekranını PC'de izle</h2><p>Bilgisayarında izleme odası aç ve altı haneli kodu Android uygulamana gir. Yayın yalnızca telefonunda izin verdikten sonra başlar.</p></div>
       <div class="cloud-controls"><a class="button button-primary" href="/screen.html">PC'de ekranı izle</a></div>
     </section><section class="cloud-panel" aria-label="Kalıcı dosya paylaşımı">
