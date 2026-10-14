@@ -127,4 +127,48 @@ wss.on('connection', ws => {
   ws.on('error', () => leave(ws));
 });
 
+// Separate, consent-based screen-share signaling rooms.
+const screenRooms = new Map();
+const screenWss = new WebSocketServer({ server, path: '/screen-signal', maxPayload: 128 * 1024 });
+function screenSend(ws, payload) { if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(payload)); }
+function screenLeave(ws) {
+  const code = ws.screenCode;
+  if (!code) return;
+  const room = screenRooms.get(code);
+  ws.screenCode = null;
+  if (!room) return;
+  if (room[ws.screenRole] === ws) room[ws.screenRole] = null;
+  const other = room.sender || room.viewer;
+  if (other) screenSend(other, { type: 'peer-left' });
+  if (!room.sender && !room.viewer) screenRooms.delete(code);
+}
+screenWss.on('connection', ws => {
+  ws.on('message', raw => {
+    let m; try { m = JSON.parse(raw); } catch { return; }
+    if (m.type === 'create-viewer') {
+      screenLeave(ws);
+      let code;
+      do { code = String(crypto.randomInt(100000, 1000000)); } while (screenRooms.has(code));
+      screenRooms.set(code, { viewer: ws, sender: null });
+      ws.screenCode = code; ws.screenRole = 'viewer';
+      screenSend(ws, { type: 'created', code, iceServers: iceServers() });
+    } else if (m.type === 'join-sender') {
+      const code = String(m.code || '');
+      const room = screenRooms.get(code);
+      if (!/^\\d{6}$/.test(code) || !room || room.sender) return screenSend(ws, {type:'error',message:'Oda bulunamadı veya dolu.'});
+      screenLeave(ws);
+      room.sender = ws; ws.screenCode = code; ws.screenRole = 'sender';
+      screenSend(ws, { type:'joined', iceServers:iceServers() });
+      screenSend(room.viewer, { type:'sender-joined' });
+    } else if (m.type === 'signal') {
+      const room = screenRooms.get(ws.screenCode);
+      if (!room || (room[ws.screenRole] !== ws)) return;
+      const other = ws.screenRole === 'viewer' ? room.sender : room.viewer;
+      if (other && JSON.stringify(m.data || {}).length < 100000) screenSend(other, {type:'signal',data:m.data});
+    } else if (m.type === 'leave') screenLeave(ws);
+  });
+  ws.on('close', () => screenLeave(ws));
+  ws.on('error', () => screenLeave(ws));
+});
+
 server.listen(PORT, '0.0.0.0', () => console.log(`Dosya paylaşımı hazır: http://localhost:${PORT}`));
