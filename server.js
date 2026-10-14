@@ -51,7 +51,15 @@ function cloudRequest(req, res, pathname) {
   return false;
 }
 const server = http.createServer((req, res) => {
-  const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+  let pathname;
+  try { pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname); }
+  catch { res.writeHead(400).end('Invalid URL'); return; }
+  if (pathname === '/api/health') {
+    res.writeHead(200, {'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});
+    res.end(JSON.stringify({ ok:true, signaling:'/signal', screenSignaling:'/screen-signal', activeRooms:rooms.size }));
+    return;
+  }
+  if (pathname === '/favicon.ico') { res.writeHead(204).end(); return; }
   if (cloudRequest(req, res, pathname)) return;
   const requested = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '');
   const file = path.resolve(ROOT, requested);
@@ -60,12 +68,12 @@ const server = http.createServer((req, res) => {
   }
   fs.readFile(file, (err, data) => {
     if (err) { res.writeHead(404).end('Not found'); return; }
-    res.writeHead(200, { 'Content-Type': mime[path.extname(file)] || 'application/octet-stream', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-cache', 'Content-Security-Policy': "default-src 'self'; connect-src 'self' ws: wss: stun: turn:; img-src 'self' data:; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'" });
+    res.writeHead(200, { 'Content-Type': mime[path.extname(file)] || 'application/octet-stream', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-cache', 'Content-Security-Policy': "default-src 'self'; connect-src 'self' ws: wss: stun: turn:; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'" });
     res.end(data);
   });
 });
 
-const wss = new WebSocketServer({ server, path: '/signal', maxPayload: 64 * 1024 });
+const wss = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024 });
 function send(ws, value) { if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(value)); }
 function freshCode() {
   for (let i = 0; i < 100; i++) {
@@ -129,7 +137,7 @@ wss.on('connection', ws => {
 
 // Separate, consent-based screen-share signaling rooms.
 const screenRooms = new Map();
-const screenWss = new WebSocketServer({ server, path: '/screen-signal', maxPayload: 128 * 1024 });
+const screenWss = new WebSocketServer({ noServer: true, maxPayload: 128 * 1024 });
 function screenSend(ws, payload) { if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(payload)); }
 function screenLeave(ws) {
   const code = ws.screenCode;
@@ -155,7 +163,7 @@ screenWss.on('connection', ws => {
     } else if (m.type === 'join-sender') {
       const code = String(m.code || '');
       const room = screenRooms.get(code);
-      if (!/^\\d{6}$/.test(code) || !room || room.sender) return screenSend(ws, {type:'error',message:'Oda bulunamadı veya dolu.'});
+      if (!/^\d{6}$/.test(code) || !room || room.sender) return screenSend(ws, {type:'error',message:'Oda bulunamadı veya dolu.'});
       screenLeave(ws);
       room.sender = ws; ws.screenCode = code; ws.screenRole = 'sender';
       screenSend(ws, { type:'joined', iceServers:iceServers() });
@@ -171,4 +179,13 @@ screenWss.on('connection', ws => {
   ws.on('error', () => screenLeave(ws));
 });
 
+server.on('upgrade', (req, socket, head) => {
+  let route;
+  try { route = new URL(req.url, 'http://localhost').pathname; }
+  catch { socket.destroy(); return; }
+  const target = route === '/signal' ? wss : route === '/screen-signal' ? screenWss : null;
+  if (!target) { socket.write('HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n'); socket.destroy(); return; }
+  try { target.handleUpgrade(req, socket, head, ws => target.emit('connection', ws, req)); }
+  catch (error) { console.error('WebSocket upgrade failed:', error); socket.destroy(); }
+});
 server.listen(PORT, '0.0.0.0', () => console.log(`Dosya paylaşımı hazır: http://localhost:${PORT}`));
