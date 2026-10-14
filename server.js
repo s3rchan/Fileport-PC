@@ -137,7 +137,7 @@ wss.on('connection', ws => {
 
 // Separate, consent-based screen-share signaling rooms.
 const screenRooms = new Map();
-const screenWss = new WebSocketServer({ noServer: true, maxPayload: 320 * 1024 });
+const screenWss = new WebSocketServer({ noServer: true, maxPayload: 768 * 1024 });
 function screenSend(ws, payload) { if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(payload)); }
 function screenLeave(ws) {
   const code = ws.screenCode;
@@ -168,12 +168,7 @@ screenWss.on('connection', ws => {
       room.sender = ws; ws.screenCode = code; ws.screenRole = 'sender';
       screenSend(ws, { type:'joined', iceServers:iceServers() });
       screenSend(room.viewer, { type:'sender-joined' });
-     } else if (m.type === 'screen-frame') {
-      const room=screenRooms.get(ws.screenCode);
-      if (!room || room.sender !== ws || !room.viewer || room.viewer.readyState !== WebSocket.OPEN) return;
-      if (typeof m.data !== 'string' || m.data.length > 250000 || !/^[A-Za-z0-9+/=]+$/.test(m.data)) return;
-      if (room.viewer.bufferedAmount < 500000) screenSend(room.viewer,{type:'screen-frame',data:m.data});
-    } else if (m.type === 'signal') {
+     } else if (m.type === 'signal') {
       const room = screenRooms.get(ws.screenCode);
       if (!room || (room[ws.screenRole] !== ws)) return;
       const other = ws.screenRole === 'viewer' ? room.sender : room.viewer;
