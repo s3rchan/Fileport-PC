@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="#f5f7fb" name="theme-color"/>
+<title>Fileport — Local File Transfer</title>
+<link href="styles.css" rel="stylesheet"/>
+<script defer="" src="i18n.js"></script><script defer="" src="pairing.js"></script><script defer="" src="sha256-stream.js"></script><script defer="" src="app.js"></script><script defer="" src="flow.js"></script><script defer="" src="desktop.js"></script>
+<style>
+ .connection-internals { position:absolute!important; width:1px!important; height:1px!important; overflow:hidden!important; clip-path:inset(50%)!important; }
+ .language-picker,.nav-language-section {display:flex;align-items:center;gap:8px;font-size:12px;}
+ .language-picker select,.nav-language-section select {border:1px solid #6d86af;border-radius:10px;padding:7px 10px;background:transparent;color:inherit;font:inherit;min-width:94px}
+ .language-picker select option,.nav-language-section select option{color:#172c50;background:#fff}
+ .nav-language-section {padding:12px 16px;justify-content:space-between}
+ .flow-setup-logo {object-fit:contain;max-width:min(240px,70vw);max-height:80px;filter:none!important;mix-blend-mode:normal!important;}
+ .side-brand img,.desktop-top-brand img,.brand-wordmark {filter:none!important;mix-blend-mode:normal!important;object-fit:contain}
+ </style></head>
+<body>
+<div class="desktop-frame"><aside class="side-nav"><div class="side-brand"><img alt="Fileport" src="fileport-wordmark-dark.png"/></div><div class="nav-meta">DESKTOP</div><button class="side-item active" data-view="chat">Chat</button><button class="side-item" data-view="devices">Devices</button><button class="side-item" data-view="history">History</button><button class="side-item" data-view="settings">Settings</button><div class="side-bottom">●  Local network</div></aside><main class="shell">
+<header class="topbar"><div class="desktop-top-brand"><img alt="Fileport" src="fileport-wordmark-dark.png"/></div><span class="top-note"><span class="offline-dot"></span> Secure P2P connection</span><div class="language-picker"><label for="languageSelect">Language / Dil</label><select id="languageSelect"><option value="en">English</option><option value="tr">Türkçe</option></select></div></header>
+<section aria-label="Dosya paylaşım odası" class="workspace">
+<div class="connection-internals" id="connectionInternals"><div class="connection-badge" id="connectionBadge"><span id="connectionText"></span></div><div id="connectionStatus" role="status"></div></div>
+<div class="transfer-grid legacy-hidden">
+<section class="transfer-card send-card">
+<div class="card-heading"><div><span class="step">02 / SEND</span><h2>Send file</h2></div><span class="card-icon">↑</span></div>
+<label class="dropzone" for="fileInput" id="dropzone"><span class="upload-icon">↑</span><strong>Drop files here</strong><span>or <u>choose from device</u></span><small>You can select multiple files</small><input id="fileInput" multiple="" type="file"/></label>
+<div class="file-list hidden" id="fileList"></div>
+<button class="button button-primary send-button" disabled="" id="sendFiles">Send files <span aria-hidden="true">→</span></button>
+<div class="progress-wrap hidden" id="sendProgressWrap"><div class="progress-caption"><span id="sendProgressLabel">Sending…</span><span id="sendProgressValue">0%</span></div><div class="progress-track"><div class="progress-fill" id="sendProgressFill"></div></div></div>
+</section>
+<section class="transfer-card receive-card">
+<div class="card-heading"><div><span class="step">03 / RECEIVE</span><h2>Received files</h2></div><span class="card-icon receive-icon">↓</span></div>
+<div class="receive-empty" id="receiveEmpty"><div class="receive-illustration"><span>↓</span></div><strong>Ready to receive</strong><p>Incoming files will appear here.</p></div>
+<div class="incoming hidden" id="incoming"><div class="incoming-name" id="incomingName">Receiving file</div><div class="progress-caption"><span id="receiveProgressLabel">Preparing…</span><span id="receiveProgressValue">0%</span></div><div class="progress-track"><div class="progress-fill receive-fill" id="receiveProgressFill"></div></div></div>
+<div class="received-list" id="receivedList"></div>
+</section>
+</div>
+</section>
+<section aria-labelledby="pcSetupHeading" aria-modal="true" class="pairing-panel flow-first-setup hidden" id="desktopPairPanel" role="dialog">
+<div class="pairing-screen flow-setup-card" id="pairWelcome">
+<img alt="Fileport" class="flow-setup-logo" src="fileport-wordmark-dark.png"/>
+<h1 id="pcSetupHeading">Connect to device</h1>
+<div aria-hidden="true" class="flow-setup-illustration"><img alt="" class="connection-art" src="connection-minimal.png"/></div>
+<p>Open Fileport on your phone. Both devices must be on the same Wi-Fi network. Confirm the security code on both devices.</p>
+<button class="button button-primary flow-setup-primary" id="desktopStart" type="button">Connect</button>
+</div>
+<div class="pairing-screen flow-setup-card hidden" id="pairWaiting">
+<img alt="Fileport" class="flow-setup-logo" src="fileport-wordmark-dark.png"/>
+<h1>Waiting for your phone</h1>
+<div aria-hidden="true" class="flow-setup-illustration"><img alt="" class="connection-art" src="connection-minimal.png"/></div>
+<p aria-live="polite" id="desktopPairCode" role="status">Preparing connection…</p>
+<p>Select your computer on the Android setup screen.</p>
+<div class="flow-setup-actions"><button class="button button-outline" id="desktopCancel" type="button">Back</button><button class="button button-primary" id="desktopRetryWaiting" type="button">Try again</button></div>
+</div>
+</section><section class="trusted-devices" id="trustedDevices"><h3>Paired devices</h3><p>Manage trusted devices here. Removing the last one returns to setup.</p><div id="trustedDeviceList"></div><div class="flow-pair desktop-device-block"><label for="flowDeviceName">This device</label><input id="flowDeviceName" maxlength="32" placeholder="e.g. Galaxy / Desktop"/><button class="button button-outline" id="flowSaveDevice" type="button">Save device name</button></div></section><section aria-label="Fileport sohbet ve aktarım" class="flow-panel" id="flowPanel">
+<div class="flow-header"><div class="flow-avatar">F</div><div><span class="step">FILEPORT</span><h2>Connection &amp; chat</h2><p id="flowDeviceStatus">Chat starts when your devices connect.</p></div><span class="flow-live" id="flowLive">● Offline</span></div>
+<div aria-labelledby="pcReconnectTitle" aria-modal="false" class="flow-reconnect hidden" id="flowReconnect" role="dialog">
+<div class="flow-reconnect-card"><span aria-hidden="true" class="flow-reconnect-icon">↻</span><h3 id="pcReconnectTitle">Connection lost</h3>
+<p id="pcReconnectText">Reconnect your phone without pairing again.</p>
+<button class="button button-primary" id="pcReconnect" type="button">Reconnect</button><small aria-live="polite" id="pcReconnectInfo"></small>
+</div></div>
+<div aria-live="polite" class="flow-conversation" id="flowMessages"><div class="flow-empty">Messages and files will appear here when connected.</div></div>
+<div class="flow-compose"><button aria-label="Attach file" class="flow-plus" id="flowPlus" title="Attach file" type="button">+</button><input aria-label="Message" autocomplete="off" id="flowText" maxlength="2000" placeholder="Type a message..."/><button class="button button-primary" disabled="" id="flowSendText" type="button">Send ↗</button></div>
+<div class="flow-tools legacy-file-tools"><button class="button button-outline" id="flowSelectFile" type="button">Choose file</button><button class="button button-outline" disabled="" id="flowSendFiles" type="button">Send files</button><button class="button button-outline" id="flowClearHistory" type="button">Clear history</button></div>
+<div class="flow-history desktop-history-block"><h3>Recent connections and transfers</h3><div class="flow-recent" id="flowRecent"></div></div>
+<div class="flow-disclaimer">History is stored on this device. Transferred files are not stored in chat history.</div>
+</section>
+<footer><span>© 2026 FILEPORT · LOCAL FILE TRANSFER</span><span id="limitNote">Files transfer directly.</span></footer>
+<section class="desktop-settings" hidden="" id="desktopSettings"><h2>Settings</h2><p>Fileport connects over your local Wi-Fi network without a website or server. Bluetooth LE discovery is experimental; Wi-Fi Direct transfer is not available.</p><p>FPTP/1 uses signed ephemeral P-256 key exchange and AES-256-GCM. Verification codes are required for the first pairing.</p><div class="manual-update"><h3>Offline update</h3><p>Select a signed Fileport Windows installer (.exe) from your computer. No internet connection is required.</p><button type="button" id="installLocalUpdate">Select update file</button><p id="localUpdateStatus" role="status"></p></div></section></main></div>
+<div class="toast hidden" id="toast" role="status"></div>
+<div aria-labelledby="securePairTitle" aria-modal="true" class="secure-pair-overlay hidden" id="securePairOverlay" role="dialog"><section class="secure-pair-card"><div class="secure-pair-top">FILEPORT · SECURE PAIRING</div><h2 id="securePairTitle">Verify device</h2><p>Compare the codes on both devices. <strong>Only if the codes match</strong> approve on both devices.</p><div class="secure-pair-code" id="securePairCode">······</div><div class="secure-pair-info" id="securePairInfo">Preparing code…</div><div class="secure-pair-actions"><button class="button button-outline" id="securePairReject" type="button">Cancel</button><button class="button button-primary" disabled="" id="securePairApprove" type="button">Codes match — approve</button></div></section></div><script src="manual-update.js"></script></body>
+</html>

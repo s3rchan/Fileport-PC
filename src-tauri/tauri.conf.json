@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Fileport",
+  "version": "1.6.0",
+  "identifier": "com.yakin.flow.pc",
+  "build": {
+    "frontendDist": "../src"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Fileport",
+        "width": 1120,
+        "height": 760,
+        "minWidth": 780,
+        "minHeight": 550,
+        "backgroundColor": "#eef2f9"
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self' asset: http://asset.localhost; connect-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self'; media-src 'self' blob:; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'"
+    },
+    "withGlobalTauri": true
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "nsis"
+    ],
+    "shortDescription": "Fileport local file transfer",
+    "icon": [
+      "icons/icon.png",
+      "icons/icon.ico"
+    ]
+  }
+}

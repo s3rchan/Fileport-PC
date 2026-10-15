@@ -1,15 +1,14 @@
 {
-  "name": "iki-kisilik-dosya-paylasimi",
-  "version": "1.0.0",
+  "name": "fileport-pc",
   "private": true,
-  "description": "Numaralı odalarla tarayıcılar arasında doğrudan WebRTC dosya aktarımı",
+  "version": "1.6.0",
+  "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "test": "node tests/fptp.integration.test.cjs"
   },
-  "engines": {
-    "node": ">=18"
-  },
-  "dependencies": {
-    "ws": "^8.18.0"
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.2.0"
   }
 }
