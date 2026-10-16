@@ -16,3 +16,11 @@ Upload this project's **contents**, including `.github/workflows/build-windows.y
 ## Security scope
 
 UDP advertisements are not trusted. Each connection request is signed by the PC's persistent ECDSA identity; Android checks the signature and the exact stored public-key fingerprint for previously paired PCs. The six-digit code is mandatory for first pairing. These changes were statically checked; production security review and device-to-device testing are still required. FPTP/1 is a custom crypto protocol, not independently audited TLS.
+
+## GitHub Actions test dependency fix
+
+The `tests/lan-request.test.cjs` test now loads the bundled
+`tests/fixtures/android-discovery.js` rather than referencing a separate
+Android project folder outside this repository. Upload the complete project,
+including the hidden `.github/workflows/build-windows.yml` file, to GitHub.
+The CI `npm test` command can now run independently within the Windows repository.

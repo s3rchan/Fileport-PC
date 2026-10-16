@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const {webcrypto:crypto}=require('node:crypto');
 const vm=require('node:vm');
 const fs=require('node:fs');
-const code=fs.readFileSync(__dirname+'/../../Fileport-Android-v2.7/app/src/main/assets/discovery.js','utf8');
+const code=fs.readFileSync(__dirname+'/fixtures/android-discovery.js','utf8');
 const E=new TextEncoder();
 const sha=async text=>Buffer.from(await crypto.subtle.digest('SHA-256',E.encode(text))).toString('hex');
 async function device(){
