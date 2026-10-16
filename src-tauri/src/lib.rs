@@ -1,6 +1,7 @@
-mod github_update;
 //! FPTP/1 desktop implementation. All application payloads are encrypted by
 //! the shared WebCrypto FPTP codec; this native socket transports opaque frames.
+
+mod github_update;
 use std::{collections::HashMap,fs::{self,File,OpenOptions},io::{Read,Write},net::{TcpListener,TcpStream,Shutdown,UdpSocket},path::PathBuf,sync::{Arc,Mutex,atomic::{AtomicU64,Ordering}},thread,time::Duration};
 use base64::Engine;
 use tauri::{AppHandle,Emitter,State};
