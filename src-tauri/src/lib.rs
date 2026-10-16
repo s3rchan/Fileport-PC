@@ -1,3 +1,4 @@
+mod github_update;
 //! FPTP/1 desktop implementation. All application payloads are encrypted by
 //! the shared WebCrypto FPTP codec; this native socket transports opaque frames.
 use std::{collections::HashMap,fs::{self,File,OpenOptions},io::{Read,Write},net::{TcpListener,TcpStream,Shutdown,UdpSocket},path::PathBuf,sync::{Arc,Mutex,atomic::{AtomicU64,Ordering}},thread,time::Duration};
@@ -226,6 +227,6 @@ pub fn run(){
  tauri::Builder::default().manage(transport).manage(Transfers::default())
  .plugin(tauri_plugin_notification::init())
  .setup(move|app|{tcp_server(app.handle().clone(),active.clone(),counter.clone());lan_phone_listener(app.handle().clone());Ok(())})
- .invoke_handler(tauri::generate_handler![begin_download,append_download,sync_download,verify_download,finish_download,pause_download,abort_download,notify_received,transport_send,transport_close,install_local_update,send_phone_request,windows_device_name])
+ .invoke_handler(tauri::generate_handler![begin_download,append_download,sync_download,verify_download,finish_download,pause_download,abort_download,notify_received,transport_send,transport_close,install_local_update,github_update::check_github_update,github_update::install_github_update,send_phone_request,windows_device_name])
  .run(tauri::generate_context!()).expect("Fileport startup failed");
 }
