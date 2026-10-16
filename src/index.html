@@ -41,25 +41,25 @@
 <section aria-labelledby="pcSetupHeading" aria-modal="true" class="pairing-panel flow-first-setup hidden" id="desktopPairPanel" role="dialog">
 <div class="pairing-screen flow-setup-card" id="pairWelcome">
 <img alt="Fileport" class="flow-setup-logo" src="fileport-wordmark-dark.png"/>
-<h1 id="pcSetupHeading">Connect to device</h1>
+<h1 id="pcSetupHeading">Fileport</h1>
 <div aria-hidden="true" class="flow-setup-illustration"><img alt="" class="connection-art" src="connection-minimal.png"/></div>
-<p>Open Fileport on your phone. Both devices must be on the same Wi-Fi network. Confirm the security code on both devices.</p>
-<button class="button button-primary flow-setup-primary" id="desktopStart" type="button">Connect</button>
+<p>Seamless connectivity and continuity across your devices.</p>
+<button class="button button-primary flow-setup-primary" id="desktopStart" type="button">Start</button>
 </div>
 <div class="pairing-screen flow-setup-card hidden" id="pairWaiting">
 <img alt="Fileport" class="flow-setup-logo" src="fileport-wordmark-dark.png"/>
-<h1>Waiting for your phone</h1>
-<div aria-hidden="true" class="flow-setup-illustration"><img alt="" class="connection-art" src="connection-minimal.png"/></div>
-<p aria-live="polite" id="desktopPairCode" role="status">Preparing connection…</p>
-<p>Select your computer on the Android setup screen.</p>
-<div class="flow-setup-actions"><button class="button button-outline" id="desktopCancel" type="button">Back</button><button class="button button-primary" id="desktopRetryWaiting" type="button">Try again</button></div>
+<h1>Select devices to register</h1>
+<p>Choose your phone below. Connection method: Wi-Fi / LAN.</p>
+<div id="desktopNearbyPhones" class="nearby-list" aria-live="polite">Looking for phones running Fileport…</div>
+<p aria-live="polite" id="desktopPairCode" role="status">Open Fileport on your phone.</p>
+<div class="flow-setup-actions"><button class="button button-outline" id="desktopCancel" type="button">Back</button><button class="button button-primary" id="desktopRetryWaiting" type="button">Refresh</button></div>
 </div>
-</section><section class="trusted-devices" id="trustedDevices"><h3>Paired devices</h3><p>Manage trusted devices here. Removing the last one returns to setup.</p><div id="trustedDeviceList"></div><div class="flow-pair desktop-device-block"><label for="flowDeviceName">This device</label><input id="flowDeviceName" maxlength="32" placeholder="e.g. Galaxy / Desktop"/><button class="button button-outline" id="flowSaveDevice" type="button">Save device name</button></div></section><section aria-label="Fileport sohbet ve aktarım" class="flow-panel" id="flowPanel">
+</section><section class="trusted-devices" id="trustedDevices"><h3>Paired devices</h3><p>Manage trusted devices here. Removing the last one returns to setup.</p><div id="trustedDeviceList"></div><button class="button button-outline" id="desktopAddDevice" type="button">Add new device</button><div class="flow-pair desktop-device-block"><label for="flowDeviceName">This device</label><input id="flowDeviceName" maxlength="32" placeholder="e.g. Galaxy / Desktop"/><button class="button button-outline" id="flowSaveDevice" type="button">Save device name</button></div></section><section aria-label="Fileport sohbet ve aktarım" class="flow-panel" id="flowPanel">
 <div class="flow-header"><div class="flow-avatar">F</div><div><span class="step">FILEPORT</span><h2>Connection &amp; chat</h2><p id="flowDeviceStatus">Chat starts when your devices connect.</p></div><span class="flow-live" id="flowLive">● Offline</span></div>
 <div aria-labelledby="pcReconnectTitle" aria-modal="false" class="flow-reconnect hidden" id="flowReconnect" role="dialog">
-<div class="flow-reconnect-card"><span aria-hidden="true" class="flow-reconnect-icon">↻</span><h3 id="pcReconnectTitle">Connection lost</h3>
-<p id="pcReconnectText">Reconnect your phone without pairing again.</p>
-<button class="button button-primary" id="pcReconnect" type="button">Reconnect</button><small aria-live="polite" id="pcReconnectInfo"></small>
+<div class="flow-reconnect-card"><span aria-hidden="true" class="flow-reconnect-icon">↻</span><h3 id="pcReconnectTitle">Connect to device</h3>
+<p id="pcReconnectText">Open Fileport on your phone to connect.</p>
+<button class="button button-primary" id="pcReconnect" type="button">Connect</button><small aria-live="polite" id="pcReconnectInfo"></small><div id="pcReconnectDevices" class="nearby-list" aria-live="polite"></div>
 </div></div>
 <div aria-live="polite" class="flow-conversation" id="flowMessages"><div class="flow-empty">Messages and files will appear here when connected.</div></div>
 <div class="flow-compose"><button aria-label="Attach file" class="flow-plus" id="flowPlus" title="Attach file" type="button">+</button><input aria-label="Message" autocomplete="off" id="flowText" maxlength="2000" placeholder="Type a message..."/><button class="button button-primary" disabled="" id="flowSendText" type="button">Send ↗</button></div>
@@ -68,7 +68,7 @@
 <div class="flow-disclaimer">History is stored on this device. Transferred files are not stored in chat history.</div>
 </section>
 <footer><span>© 2026 FILEPORT · LOCAL FILE TRANSFER</span><span id="limitNote">Files transfer directly.</span></footer>
-<section class="desktop-settings" hidden="" id="desktopSettings"><h2>Settings</h2><p>Fileport connects over your local Wi-Fi network without a website or server. Bluetooth LE discovery is experimental; Wi-Fi Direct transfer is not available.</p><p>FPTP/1 uses signed ephemeral P-256 key exchange and AES-256-GCM. Verification codes are required for the first pairing.</p><div class="manual-update"><h3>Offline update</h3><p>Select a signed Fileport Windows installer (.exe) from your computer. No internet connection is required.</p><button type="button" id="installLocalUpdate">Select update file</button><p id="localUpdateStatus" role="status"></p></div></section></main></div>
+<section class="desktop-settings" hidden="" id="desktopSettings"><h2>Settings</h2><p>Fileport connects over your local Wi-Fi network without a website or server. Bluetooth is not used for connection or transfer.</p><p>FPTP/1 uses signed ephemeral P-256 key exchange and AES-256-GCM. Verification codes are required for the first pairing.</p><div class="manual-update"><h3>Offline update</h3><p>Select a signed Fileport Windows installer (.exe) from your computer. No internet connection is required.</p><button type="button" id="installLocalUpdate">Select update file</button><p id="localUpdateStatus" role="status"></p></div></section></main></div>
 <div class="toast hidden" id="toast" role="status"></div>
-<div aria-labelledby="securePairTitle" aria-modal="true" class="secure-pair-overlay hidden" id="securePairOverlay" role="dialog"><section class="secure-pair-card"><div class="secure-pair-top">FILEPORT · SECURE PAIRING</div><h2 id="securePairTitle">Verify device</h2><p>Compare the codes on both devices. <strong>Only if the codes match</strong> approve on both devices.</p><div class="secure-pair-code" id="securePairCode">······</div><div class="secure-pair-info" id="securePairInfo">Preparing code…</div><div class="secure-pair-actions"><button class="button button-outline" id="securePairReject" type="button">Cancel</button><button class="button button-primary" disabled="" id="securePairApprove" type="button">Codes match — approve</button></div></section></div><script src="manual-update.js"></script></body>
+<div aria-labelledby="securePairTitle" aria-modal="true" class="secure-pair-overlay hidden" id="securePairOverlay" role="dialog"><section class="secure-pair-card"><div class="secure-pair-top">FILEPORT · SECURE PAIRING</div><h2 id="securePairTitle">Select your device</h2><p id="securePairMessage">Confirm the passkey to connect to your phone. Approve the matching code on both devices.</p><div class="secure-pair-code" id="securePairCode">······</div><div class="secure-pair-info" id="securePairInfo">Preparing code…</div><div class="secure-pair-actions"><button class="button button-outline" id="securePairReject" type="button">Cancel</button><button class="button button-primary" disabled="" id="securePairApprove" type="button">OK</button></div></section></div><script src="manual-update.js"></script></body>
 </html>

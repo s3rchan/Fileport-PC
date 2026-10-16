@@ -34,7 +34,7 @@ function createDevice(name,android){
     setTimeout(()=>{reconnections++;peers.pc.win.FileportTransport.onOpen();peers.android.win.FileportTransport.onOpen();},220);},2);}
   return item.content.length;},
  syncDownload:id=>stored.get(id).content.length,verifyDownload:(id,digest)=>{return require('node:crypto').createHash('sha256').update(stored.get(id).content).digest('hex')===digest;},finishDownload:id=>{assert.equal(stored.get(id).content.length,stored.get(id).size);},pauseDownload(){},abortDownload(id){stored.delete(id);},
- connectTransport(){},disconnectTransport(){},scanNearby(){},setTransferActive(){},
+ connectTransport(){},disconnectTransport(){},scanNearby(){},setTransferActive(){},showConnectedNotification(){},hideConnectedNotification(){},
  transportSend:frame=>{const gen=wireGeneration;setTimeout(()=>{if(peers.pc&&wireGeneration===gen)peers.pc.win.FileportTransport.onFrame(frame);},0);}
  };
  if(android)win.FileportNative=native;

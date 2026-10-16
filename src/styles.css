@@ -99,3 +99,15 @@ html,body{height:100%;margin:0;overscroll-behavior:none}body{background:#eef2f9}
 
 /* Fileport drag-and-drop feedback (desktop and external mouse/trackpad on Android). */
 .flow-conversation.fileport-drag-target{outline:3px dashed #3982ff!important;outline-offset:-7px;background:rgba(57,130,255,.12)!important;transition:background .12s ease}
+
+/* Fileport 1.7/2.7 PC-led LAN pairing and connection permission. */
+.nearby-list{display:flex;flex-direction:column;gap:10px;align-items:stretch;width:100%}
+.nearby-device{display:block;width:100%;text-align:left;font-weight:700;font-size:14px;min-height:52px;border-radius:13px;cursor:pointer}
+.nearby-device:hover{border-color:#73a3ff;box-shadow:0 0 0 2px #438aff22}
+.fileport-request-overlay{position:fixed;inset:0;z-index:99998;display:grid;place-items:center;padding:20px;background:#0c1526bd;box-sizing:border-box}
+.fileport-request-overlay.hidden{display:none!important}
+.fileport-request-card{background:#192638;border:1px solid #415a79;box-shadow:0 22px 74px #0008;border-radius:21px;color:#fff;width:min(440px,100%);padding:30px;text-align:center}
+.fileport-request-card h2{font-size:25px;margin:16px 0}.fileport-request-card p{color:#d2def1;line-height:1.7;font-size:15px}
+.fileport-auto-label{display:flex;align-items:center;text-align:left;gap:12px;color:#d7e6fc;border:1px solid #465879;padding:14px;border-radius:12px;margin:24px 0}
+.fileport-auto-label input{width:20px;height:20px;accent-color:#3783ff;flex-shrink:0}
+.setup-waiting-tip{opacity:.88}

@@ -33,7 +33,7 @@
  async function keyId(jwk){return hex(await sha(canonical(jwk)));}
  function readTrusted(){try{let values=JSON.parse(localStorage.getItem(trustKey)||'[]');return Array.isArray(values)?values.filter(x=>x&&typeof x.id==='string'&&x.jwk):[];}catch{return [];}}
  function trusted(id){return readTrusted().find(x=>x.id===id)||null;}
- function putTrusted(id,jwk,name){if(id!==undefined){const records=readTrusted().filter(x=>x.id!==id);records.push({id,jwk,name:String(name||'Cihaz').slice(0,32),pairedAt:Date.now()});localStorage.setItem(trustKey,JSON.stringify(records));window.dispatchEvent(new Event('fileport-trusted-updated'));}}
+ function putTrusted(id,jwk,name){if(id!==undefined){const records=readTrusted().filter(x=>x.id!==id);records.push({id,jwk,name:String(name||'Device').slice(0,32),pairedAt:Date.now()});localStorage.setItem(trustKey,JSON.stringify(records));window.dispatchEvent(new Event('fileport-trusted-updated'));}}
  function removeTrusted(id){localStorage.setItem(trustKey,JSON.stringify(readTrusted().filter(x=>x.id!==id)));if(window.FileportConnection?.currentPeerId===id)window.FileportConnection.disconnect();window.dispatchEvent(new Event('fileport-trusted-updated'));}
  function nonce(){const a=new Uint8Array(24);crypto.getRandomValues(a);return hex(a);}
  async function sign(privateKey,transcript){const sig=await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},privateKey,enc.encode(transcript));return hex(new Uint8Array(sig));}
@@ -41,8 +41,8 @@
  const ui=()=>{
   const list=document.getElementById('trustedDeviceList');if(!list)return;
   list.replaceChildren();const records=readTrusted();
-  if(!records.length){const p=document.createElement('p');p.textContent='Henüz kayıtlı güvenilir cihaz yok.';list.append(p);return;}
-  for(const rec of records){const item=document.createElement('div');item.className='trusted-device-item';const label=document.createElement('span');label.textContent=`${rec.name} · ${rec.id.slice(0,12)}…`;const btn=document.createElement('button');btn.className='button button-outline';btn.type='button';btn.textContent='Kaldır';btn.addEventListener('click',()=>{if(confirm(`${rec.name} adlı cihazın güvenini kaldırmak istiyor musun?`))removeTrusted(rec.id);});item.append(label,btn);list.append(item);}
+  if(!records.length){const p=document.createElement('p');p.textContent='No trusted devices saved yet.';list.append(p);return;}
+  for(const rec of records){const item=document.createElement('div');item.className='trusted-device-item';const label=document.createElement('span');label.textContent=`${rec.name} · ${rec.id.slice(0,12)}…`;const btn=document.createElement('button');btn.className='button button-outline';btn.type='button';btn.textContent='Remove';btn.addEventListener('click',()=>{if(confirm(`Remove trust for ${rec.name}?`))removeTrusted(rec.id);});item.append(label,btn);list.append(item);}
  };
  document.addEventListener('DOMContentLoaded',ui);window.addEventListener('fileport-trusted-updated',ui);
  window.FileportIdentity={identity,keyId,nonce,sha,hex,sign,verify,trusted,putTrusted,readTrusted,removeTrusted};

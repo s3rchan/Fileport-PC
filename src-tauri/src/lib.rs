@@ -107,38 +107,43 @@ fn abort_download(transfer_id:String,state:State<'_,Transfers>)->Result<(),Strin
 fn notify_received(app:AppHandle,filename:String)->Result<(),String>{
  app.notification().builder().title("Fileport").body(format!("File received: {}",safe_name(&filename))).show().map_err(|e|e.to_string())
 }
-#[derive(Default)]struct Discovery {id:Arc<Mutex<String>>}
-#[tauri::command]
-fn set_discovery_identity(device_id:String,state:State<'_,Discovery>)->Result<(),String>{
- if device_id.len()!=64||!device_id.bytes().all(|b|b.is_ascii_hexdigit()){return Err("Invalid device ID".into());}
- *state.id.lock().map_err(|e|e.to_string())?=device_id.to_lowercase();Ok(())
-}
-fn broadcaster(state:Arc<Mutex<String>>){thread::spawn(move||{
- let socket=match UdpSocket::bind("0.0.0.0:0"){Ok(s)=>s,Err(_)=>return};let _=socket.set_broadcast(true);
- loop {let id=state.lock().map(|s|s.clone()).unwrap_or_default();
-  if !id.is_empty(){let payload=format!("FILEPORT_DISCOVERY_V1|Windows PC|{id}|{PORT}");
-   let _=socket.send_to(payload.as_bytes(),"255.255.255.255:38476");}
-  thread::sleep(Duration::from_secs(2));
- }
-});}
-// DNS-SD publishes on all active interfaces; UDP discovery remains a fallback.
-fn mdns_advertiser(identity:Arc<Mutex<String>>){
+fn lan_phone_listener(app:AppHandle){
  thread::spawn(move||{
-  use mdns_sd::{ServiceDaemon,ServiceInfo};
-  let daemon=match ServiceDaemon::new(){Ok(d)=>d,Err(_)=>return};
-  let mut last=String::new();
+  let socket=match UdpSocket::bind("0.0.0.0:38478"){Ok(s)=>s,Err(e)=>{event(&app,"error",&format!("Phone discovery unavailable: {e}"));return;}};
+  let _=socket.set_read_timeout(Some(Duration::from_millis(1200)));
+  let mut buf=[0u8;1024];
   loop {
-   let id=identity.lock().map(|s|s.clone()).unwrap_or_default();
-   if id.len()==64 && id!=last {
-    let host=format!("fileport-{}.local.",&id[..10]);
-    let props=[("id",id.as_str()),("protocol","FPTP/1")];
-    if let Ok(service)=ServiceInfo::new("_fileport._tcp.local.","Fileport-PC",&host,"",PORT,&props[..]) {
-     let _=daemon.register(service.enable_addr_auto());last=id;
-    }
-   }
-   thread::sleep(Duration::from_secs(2));
+   let (size,from)=match socket.recv_from(&mut buf){Ok(pair)=>pair,Err(_)=>continue};
+   if !from.ip().is_ipv4()||!is_local_ip(from.ip()){continue;}
+   let data=match std::str::from_utf8(&buf[..size]){Ok(s)=>s,Err(_)=>continue};
+   let mut fields=data.split('|');
+   if fields.next()!=Some("FILEPORT_PHONE_V1"){continue;}
+   let (Some(id),Some(name),None)=(fields.next(),fields.next(),fields.next()) else {continue};
+   if id.len()!=64||!id.bytes().all(|b|b.is_ascii_hexdigit())||name.len()>64||name.chars().any(|c|c.is_control()){continue;}
+   let _=app.emit("fileport-phone-found",serde_json::json!({"id":id,"name":name,"address":from.ip().to_string()}));
   }
  });
+}
+fn is_local_ip(ip:std::net::IpAddr)->bool{
+ match ip {std::net::IpAddr::V4(x)=>x.is_private()||x.is_link_local(),_=>false}
+}
+#[tauri::command]
+fn send_phone_request(address:String,packet:String)->Result<(),String>{
+ use std::net::IpAddr;
+ let ip:IpAddr=address.parse().map_err(|_|"Invalid device IP")?;
+ if !is_local_ip(ip)||!ip.is_ipv4(){return Err("A private IPv4 address is required".into());}
+ if packet.len()>2048{return Err("Request too large".into());}
+ let v:serde_json::Value=serde_json::from_str(&packet).map_err(|_|"Bad request JSON")?;
+ if v.get("v").and_then(|v|v.as_u64())!=Some(1)||v.get("kind").and_then(|v|v.as_str())!=Some("connect-request"){
+  return Err("Unexpected request type".into());
+ }
+ let socket=UdpSocket::bind("0.0.0.0:0").map_err(|e|e.to_string())?;
+ socket.send_to(packet.as_bytes(),(ip,38479)).map_err(|e|e.to_string())?;Ok(())
+}
+#[tauri::command]
+fn windows_device_name()->String{
+ std::env::var("COMPUTERNAME").or_else(|_|std::env::var("HOSTNAME")).unwrap_or_else(|_|"Windows PC".into())
+ .chars().filter(|c|!c.is_control()).take(32).collect()
 }
 #[derive(Default)]struct Transport {current:Arc<Mutex<Option<Peer>>>,counter:Arc<AtomicU64>}
 struct Peer{generation:u64,writer:TcpStream}
@@ -189,30 +194,6 @@ fn tcp_server(app:AppHandle,transport:Arc<Mutex<Option<Peer>>>,counter:Arc<Atomi
  }
  });
 }
-// BLE is a discovery hint only; it never transports data or grants access.
-#[cfg(target_os="windows")]
-mod winrt_apartment {
- #[link(name="runtimeobject")]unsafe extern "system"{fn RoInitialize(init_type:i32)->i32;fn RoUninitialize();}
- pub struct Mta;impl Mta {pub fn initialize()->Result<Self,i32>{let hr=unsafe{RoInitialize(1)};if hr>=0{Ok(Self)}else{Err(hr)}}}
- impl Drop for Mta{fn drop(&mut self){unsafe{RoUninitialize()}}}
-}
-#[cfg(target_os="windows")]
-fn ble_advertiser(state:Arc<Mutex<String>>){thread::spawn(move||{
- use windows::Devices::Bluetooth::Advertisement::{BluetoothLEAdvertisementPublisher,BluetoothLEManufacturerData};
- use windows::Storage::Streams::DataWriter;
- let _apartment=match winrt_apartment::Mta::initialize(){Ok(a)=>a,Err(_)=>return};
- let mut previous=String::new();let mut active:Option<BluetoothLEAdvertisementPublisher>=None;
- loop {let current=state.lock().map(|v|v.clone()).unwrap_or_default();if current!=previous{
-  if let Some(p)=active.take(){let _=p.Stop();}previous=current.clone();if current.len()==64{
-   let mut payload=b"FP1".to_vec();for i in 0..10{payload.push(u8::from_str_radix(&current[i*2..i*2+2],16).unwrap_or(0));}
-   if let Ok(publisher)=(||->windows::core::Result<BluetoothLEAdvertisementPublisher>{
-    let publisher=BluetoothLEAdvertisementPublisher::new()?;let data=BluetoothLEManufacturerData::new()?;
-    data.SetCompanyId(0xFFFF)?;let writer=DataWriter::new()?;writer.WriteBytes(&payload)?;
-    data.SetData(&writer.DetachBuffer()?)?;publisher.Advertisement()?.ManufacturerData()?.Append(&data)?;publisher.Start()?;Ok(publisher)
-   })(){active=Some(publisher);}
-  }
- }thread::sleep(Duration::from_millis(800));}
-});}
 // Offline manual installer selection. Only a valid Authenticode-signed installer
 // signed by the same publisher certificate as the running application is accepted.
 #[tauri::command]
@@ -241,12 +222,10 @@ fn install_local_update() -> Result<String,String> {
 }
 #[cfg_attr(mobile,tauri::mobile_entry_point)]
 pub fn run(){
- let discovery=Discovery::default();broadcaster(discovery.id.clone());mdns_advertiser(discovery.id.clone());
- #[cfg(target_os="windows")]ble_advertiser(discovery.id.clone());
  let transport=Transport::default();let active=transport.current.clone();let counter=transport.counter.clone();
- tauri::Builder::default().manage(discovery).manage(transport).manage(Transfers::default())
+ tauri::Builder::default().manage(transport).manage(Transfers::default())
  .plugin(tauri_plugin_notification::init())
- .setup(move|app|{tcp_server(app.handle().clone(),active.clone(),counter.clone());Ok(())})
- .invoke_handler(tauri::generate_handler![begin_download,append_download,sync_download,verify_download,finish_download,pause_download,abort_download,notify_received,set_discovery_identity,transport_send,transport_close,install_local_update])
+ .setup(move|app|{tcp_server(app.handle().clone(),active.clone(),counter.clone());lan_phone_listener(app.handle().clone());Ok(())})
+ .invoke_handler(tauri::generate_handler![begin_download,append_download,sync_download,verify_download,finish_download,pause_download,abort_download,notify_received,transport_send,transport_close,install_local_update,send_phone_request,windows_device_name])
  .run(tauri::generate_context!()).expect("Fileport startup failed");
 }

@@ -92,6 +92,8 @@
   if(s.remote)throw Error('Duplicate identity frame');
   if(!msg.jwk||typeof msg.id!=='string'||!(/^[a-f0-9]{48}$/).test(msg.nonce)||!msg.eph||!msg.eph.x||!msg.eph.y||typeof msg.name!=='string'||msg.name.length>32)throw Error('Invalid identity format');
   if(await identity.keyId(msg.jwk)!==msg.id||msg.id===s.hello.id)throw Error('Identity fingerprint mismatch');
+  const expected=window.FileportDesktop?.expectedPeerId?.();
+  if(expected&&msg.id!==expected)throw Error('Peer identity does not match the approved connection request');
   const challenge=`FPTP/1|HELLO|${msg.id}|${msg.nonce}|${msg.eph.x}|${msg.eph.y}|${msg.name}`;
   if(!(await identity.verify(msg.jwk,msg.sig,challenge)))throw Error('Signature verification failed');
   s.remote=msg;s.peerName=String(msg.name||'Device').slice(0,32);
@@ -110,6 +112,14 @@
   const sas=await identity.sha('FPTP/1|VERIFY|'+transcript);
   const number=(sas[0]*65536+sas[1]*256+sas[2])%1000000;
   ui.pairCode.textContent=String(number).padStart(6,'0');ui.pair.classList.remove('hidden');
+  const pairMessage=$('securePairMessage');
+  const tr=window.FileportI18n?.language==='tr';
+  if(pairMessage)pairMessage.textContent=ANDROID
+    ? (tr?`Geçiş anahtarının ${s.peerName} cihazındakiyle aynı olduğunu onaylayın. İki cihazda da Tamam'a basın.`
+         :`Confirm that this six-digit passkey matches the one on ${s.peerName}. Both devices must approve.`)
+    : (tr?`${s.peerName} cihazına bağlanmak için geçiş anahtarını doğrulayın. İki cihazda da Tamam'a basın.`
+         :`Confirm this six-digit passkey to connect to ${s.peerName}. Both devices must approve.`);
+  if(ANDROID)document.getElementById('phoneRequestOverlay')?.classList.add('hidden');
   const saved=identity.trusted(msg.id);
   if(saved&&await identity.keyId(saved.jwk)===msg.id){
    s.approved=true;ui.pairInfo.textContent='Previously paired device verified.';ui.approve.disabled=true;
@@ -147,7 +157,9 @@
   s.verified=true;clearTimeout(s.timeout);ui.pair.classList.add('hidden');window.FileportConnection.currentPeerId=s.remote.id;
   identity.putTrusted(s.remote.id,s.remote.jwk,s.peerName);
   window.FileportFlow?.peerName(s.peerName);window.FileportFlow?.connected();
-  window.dispatchEvent(new Event('fileport-peer-connected'));connection('Connected',true);status('Secure local connection ready');refreshSend();
+  window.dispatchEvent(new Event('fileport-peer-connected'));
+  if(ANDROID)window.FileportNative.showConnectedNotification(s.peerName);
+  connection('Connected',true);status('Secure local connection ready');refreshSend();
   if(ANDROID && filesPending.length&&!sending){setTimeout(()=>{if(session===s&&s.verified)void sendFiles(filesPending);},400);}
   else if(!ANDROID && filesPending.length&&!sending){setTimeout(()=>{if(session===s&&s.verified)void sendFiles(filesPending);},400);}
  }
@@ -176,7 +188,7 @@
  }
  async function host(){
   if(ANDROID)return;
-  try{const myself=await identity.identity();await invoke('set_discovery_identity',{deviceId:myself.id});status('Waiting for a paired device on local Wi-Fi');connection('Waiting');}
+  try{await identity.identity();status('Listening for Fileport Android phones on local Wi-Fi');connection('Waiting');}
   catch(error){status('Cannot announce this device: '+error.message,true);}
  }
  function connectDevice(device){
@@ -318,9 +330,9 @@
  // Prevent dropping a file outside the drop targets from replacing the app page.
  window.addEventListener('dragover',event=>{if(Array.from(event.dataTransfer?.types||[]).includes('Files'))event.preventDefault();});
  window.addEventListener('drop',event=>{if(Array.from(event.dataTransfer?.types||[]).includes('Files'))event.preventDefault();});
- window.FileportConnection={host,connectDevice,disconnect:()=>{void closeTransport();dropConnection('Disconnected');},pickFiles:()=>ui.input.click()};
+ window.FileportConnection={host,connectDevice,disconnect:()=>{void closeTransport();dropConnection('Disconnected');},pickFiles:()=>ui.input.click(),get connected(){return !!session?.verified;},get peerId(){return session?.remote?.id||null;}};
  window.FileportFlowTransport={sendText(text){if(!session?.verified)throw Error('Device is not authenticated');void sendPacket({t:'text',text:String(text).slice(0,2000)}).catch(e=>status(e.message,true));}};
- window.FileportInternal={sendFiles:()=>ui.send.click(),pickFiles:()=>ui.input.click()};
+ window.FileportInternal={sendFiles:()=>ui.send.click(),pickFiles:()=>ui.input.click(),get connected(){return !!session?.verified;},get peerId(){return session?.remote?.id||null;}};
  window.FileportDisconnectIfIdle=()=>{if(!window.FileportTransferActive)window.FileportConnection.disconnect();};
  // When backgrounded, disconnect only after 3 minutes of inactivity.
  let backgroundTimer;
