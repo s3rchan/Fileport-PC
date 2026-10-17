@@ -1,72 +1,72 @@
 # Fileport — Windows PC
 
-**Fileport**, Windows bilgisayarınız ile Android telefonunuz arasında aynı Wi-Fi / yerel ağ (LAN) üzerinden doğrudan dosya aktarımı ve mesajlaşma sağlayan bir masaüstü uygulamasıdır.
+**Fileport** is a desktop application for direct file transfers and messaging between a Windows PC and an Android phone over the same Wi-Fi or local area network (LAN).
 
-**Güncel Windows sürümü:** v1.8.0 · **Android:** Ayrı [Fileport Android deposu](https://github.com/s3rchan/Fileport-Android)
+**Current Windows version:** v1.8.0 · **Android app:** [Fileport Android repository](https://github.com/s3rchan/Fileport-Android)
 
-[**⬇ Windows kurulum dosyasını indir — GitHub Releases**](https://github.com/s3rchan/Fileport-PC/releases/latest)
+[**Download the Windows installer — GitHub Releases**](https://github.com/s3rchan/Fileport-PC/releases/latest)
 
-> **Not:** Bu depo artık eski "Yakın" oda kodlu WebRTC hizmeti değildir. Fileport, yerel ağda çalışan bağımsız bir Windows uygulamasıdır; numaralı oda, web sinyalleşme sunucusu veya TURN gerektirmez.
+> **Note:** This repository is no longer the original room-code-based "Yakın" WebRTC project. Fileport is a standalone Windows application for local networks and does not require numbered rooms, a web signaling server, or TURN.
 
-## Özellikler
+## Features
 
-- **Bilgisayardan başlatılan eşleştirme:** Windows, aynı yerel ağdaki Fileport Android cihazlarını keşfeder ve bağlantı isteği gönderir.
-- **Telefon onayı:** Android, gelen bağlantı isteğini kabul veya reddeder. İstenirse güvenilir cihazlar için otomatik bağlanma izni verilebilir.
-- **İlk eşleştirmede güvenlik kodu:** Ekranlarda görünen altı haneli kod karşılaştırılarak iki cihazda da onaylanır.
-- **Doğrudan dosya aktarımı ve sohbet:** Yerel ağ üzerinden FPTP/1 bağlantısıyla çalışır.
-- **Cihaz ve aktarım geçmişi:** Geçmiş yerel olarak tutulur; aktarılan dosyalar sohbet geçmişine eklenmez.
-- **Yeniden bağlanma:** Kayıtlı cihazlara bilgisayardan yeniden bağlantı isteği gönderilebilir.
-- **Güncelleme seçenekleri:** Ayarlarda GitHub Releases üzerinden güncelleme kontrolü ve çevrimdışı kurulum dosyası seçme işlevleri bulunur.
-- **Türkçe ve İngilizce arayüz.**
+- **PC-initiated pairing:** Windows discovers Fileport Android devices on the same local network and sends connection requests.
+- **Phone approval:** Android accepts or rejects incoming requests. Automatic reconnection may be enabled for trusted computers.
+- **Six-digit verification:** During first-time pairing, compare and approve the six-digit security code on both devices.
+- **Direct file transfers and chat:** Communicate over a local FPTP/1 connection.
+- **Local device and transfer history:** History stays on the device; transferred files are not stored in chat history.
+- **Reconnection:** The PC can send a new connection request to a previously trusted device.
+- **Update options:** Check GitHub Releases for updates or choose an installer manually using the offline update option.
+- **English and Turkish interface.**
 
-## Gereksinimler
+## Requirements
 
-- Windows 10/11 (x64).
-- Android telefonda Fileport Android uygulaması.
-- İki cihazın birbirine erişebildiği aynı Wi-Fi / yerel ağ.
-- Windows güvenlik duvarında uygulamanın yerel ağ iletişimine izin verilmesi.
+- Windows 10 or 11 (x64).
+- The Fileport Android app installed on your phone.
+- Both devices connected to the same reachable Wi-Fi/LAN.
+- Windows Firewall configured to allow Fileport's local network communication.
 
-Yerel dosya aktarımı için internet bağlantısı gerekmez. **GitHub üzerinden yeni sürüm sorgulama ve indirme** ise internete ihtiyaç duyar.
+Local transfers do **not** require internet access. Checking GitHub for updates and downloading them **does** require internet access.
 
-## Kurulum
+## Installation and first connection
 
-1. [GitHub Releases](https://github.com/s3rchan/Fileport-PC/releases) sayfasına gidin.
-2. En yeni Windows sürümündeki `Fileport_*_x64-setup.exe` kurulum dosyasını indirin.
-3. Kurulumu tamamlayın ve Fileport'u başlatın.
-4. Android telefonunuzda Fileport'u açın.
-5. PC'de **Start / Connect** akışıyla telefonu seçin.
-6. Telefona gelen bağlantı isteğini onaylayın. İlk eşleştirmede iki cihazdaki altı haneli kodu karşılaştırıp onaylayın.
-7. Bağlantı kurulduğunda sohbet ve dosya paylaşımını kullanın.
+1. Open [GitHub Releases](https://github.com/s3rchan/Fileport-PC/releases).
+2. Download the latest `Fileport_*_x64-setup.exe` installer.
+3. Install and launch Fileport on Windows.
+4. Open Fileport on your Android phone.
+5. On the PC, select the phone through the **Start / Connect** flow.
+6. Approve the incoming request on the phone. During initial pairing, compare the six-digit code on both devices and confirm.
+7. Once connected, use chat and file sharing.
 
-> **Windows SmartScreen:** Mevcut kurulum dosyaları otomatik olarak Microsoft tarafından güvenilir yayıncı kabul edilmez. GitHub Releases üzerinden yayımlama, kod imzalama sertifikasının yerine geçmez. Dosyayı yalnızca bu deponun resmî Releases sayfasından edinin.
+> **Windows SmartScreen:** Publishing an installer on GitHub Releases does not automatically establish a trusted publisher reputation or replace Authenticode signing. Download installers only from the official Releases page.
 
-## GitHub Releases ve güncellemeler
+## GitHub Releases and updates
 
-Windows sürümleri `pc-vX.Y.Z` biçiminde etiketlenir. Örneğin **v1.8.0** sürümünün etiketi `pc-v1.8.0`'dır.
+Windows releases use tags in the format `pc-vX.Y.Z` (for example, `pc-v1.8.0`).
 
-- [Windows Releases](https://github.com/s3rchan/Fileport-PC/releases)
+- [Windows releases](https://github.com/s3rchan/Fileport-PC/releases)
 - [Windows GitHub Actions](https://github.com/s3rchan/Fileport-PC/actions)
-- [Android Releases](https://github.com/s3rchan/Fileport-Android/releases)
+- [Android releases](https://github.com/s3rchan/Fileport-Android/releases)
 
-Fileport PC'de **Settings → GitHub updates (Windows)** bölümünden güncelleme aranabilir. Daha yeni bir sürüm bulunduğunda Windows kurulum dosyası indirilebilir. **Offline update** seçeneği de mevcuttur.
+In Fileport PC, open **Settings → GitHub updates (Windows)** to check for a newer version and download its installer. The **Offline update** option is also available.
 
-**Depo adı değişikliği hakkında:** v1.8.0 kaynak kodundaki GitHub güncelleme adresleri önceki depo adı olan `s3rchan/Fileport-PC-v1.6` yoluna işaret eder. GitHub'ın yönlendirmeleri bu yolu çözdüğü sürece çalışabilir; sonraki PC sürümünde güncelleme URL'leri kalıcı `s3rchan/Fileport-PC` yoluna uyarlanmalı ve gerçek Windows cihazında yeniden test edilmelidir. Mevcut sürümün güncelleme davranışı burada garanti edilmez.
+**Repository rename compatibility:** The v1.8.0 updater source still references the former repository path `s3rchan/Fileport-PC-v1.6`. It may continue to work through GitHub's redirects, but the next Windows release should update the URLs to `s3rchan/Fileport-PC` and test the complete flow on a real Windows machine. Update behavior in the current build is not guaranteed.
 
-### Windows için otomatik derleme
+### Automated Windows builds
 
-**Actions → Build Fileport Windows EXE → Run workflow** adımlarıyla derleme başlatılabilir.
+Open **Actions → Build Fileport Windows EXE → Run workflow**.
 
-- Sıradan `main` güncellemesi: CI testleri çalışır, NSIS EXE hazırlanır ve **Artifacts → Fileport-Windows-Installer** bölümüne yüklenir.
-- **Publish installer to GitHub Releases** işaretlenmiş manuel çalıştırma: başarılı derlemenin kurulum dosyasını uygulama sürümüne karşılık gelen `pc-vX.Y.Z` Release'ine yayımlar.
-- `pc-v*` etiketiyle tetiklenen derleme: sürüm kontrolünün ardından Release dosyasını yayımlar.
+- A regular push to `main` runs CI tests, builds the NSIS installer, and makes it available under **Artifacts → Fileport-Windows-Installer**.
+- A manual run with **Publish installer to GitHub Releases** selected also publishes the resulting installer to the `pc-vX.Y.Z` release matching the app version.
+- Pushing a `pc-v*` tag triggers a version check and publication to the associated Release.
 
-**GitHub Actions başarısı**, her cihaz ve ağ üzerinde sorunsuz çalışmayı garanti etmez; Windows–Android eşleştirmesi ve aktarımlar gerçek cihazlarda ayrıca doğrulanmalıdır.
+**A successful GitHub Actions build does not guarantee compatibility** with every device or network. Windows–Android pairing and transfers should also be tested on physical devices.
 
-## Geliştirme
+## Development
 
-Kaynak kod, **Tauri 2 / Rust** masaüstü katmanı ve **HTML, CSS, JavaScript** arayüzünden oluşur.
+Fileport uses **Tauri 2 / Rust** for the native Windows application and **HTML, CSS, and JavaScript** for the interface.
 
-Yerel geliştirme için Node.js, Rust ve gerekli Windows derleme araçları gerekir.
+Local development requires Node.js, Rust, and the necessary Windows build tools.
 
 ```bash
 npm install
@@ -74,28 +74,28 @@ npm test
 npm run build -- --bundles nsis
 ```
 
-Protokol, yerel ağ bağlantısı ve güncelleme testleri `tests/` dizinindedir. Ayrıntılı protokol açıklaması için [FPTP_PROTOCOL_v1.md](FPTP_PROTOCOL_v1.md) dosyasına bakın.
+Protocol, LAN connection, and updater tests are in `tests/`. See [FPTP_PROTOCOL_v1.md](FPTP_PROTOCOL_v1.md) for protocol details.
 
-## Güvenlik ve gizlilik
+## Security and privacy
 
-Fileport yerel ağ üzerinden doğrudan cihazlar arası iletişimi hedefler. FPTP/1, uygulamanın deneysel şifreli aktarım protokolüdür; **bağımsız üçüncü taraf güvenlik denetiminden geçmemiştir**. İlk eşleştirmede kodu mutlaka karşılaştırın ve yalnızca tanıdığınız cihazlardan gelen istekleri kabul edin.
+Fileport is designed for direct communication over a local network. FPTP/1 is an experimental encrypted application protocol that **has not undergone an independent third-party security audit**. Always compare the pairing codes and approve requests only from devices you recognize.
 
-## Fileport marka kimliği
+## Fileport brand identity
 
-Planlanan / onaylanan resmî görsel kimlik:
+The approved visual identity for upcoming releases:
 
-| Öğe | Standart |
+| Element | Standard |
 | --- | --- |
-| Ana marka mavisi | `#0637E7` |
-| Açık mavi | `#368CFF` |
-| Lacivert | `#01224F` |
-| Açık yüzey | `#CFE1F4` |
-| Beyaz | `#FFFFFF` |
-| Yazı tipi | **Open Sauce** |
-| Logo | **Mavi zeminli beyaz çapa simgesi ve Fileport yazısı** |
+| Primary blue | `#0637E7` |
+| Light blue | `#368CFF` |
+| Navy | `#01224F` |
+| Light background | `#CFE1F4` |
+| White | `#FFFFFF` |
+| Font | **Open Sauce** |
+| Logo | **White anchor symbol and Fileport wordmark on blue** |
 
-> Yeni marka kimliği, gelecek uygulama sürümlerine aşamalı uygulanacaktır. README'de tanımlanması mevcut v1.8.0 EXE'nin logosunun, renklerinin veya yazı tipinin değiştirildiği anlamına gelmez.
+> The new brand identity will be introduced gradually in future versions. Its documentation here does not mean the current v1.8.0 EXE already uses the new logo, colors, or typography.
 
 ---
 
-**Fileport — Windows ve Android arasında doğrudan bağlantı, dosya paylaşımı ve sohbet.**
+**Fileport — direct connection, file sharing, and chat between Windows and Android.**
