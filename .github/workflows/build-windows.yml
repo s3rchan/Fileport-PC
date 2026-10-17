@@ -38,6 +38,11 @@ jobs:
           workspaces: src-tauri
       - name: Install JavaScript dependencies
         run: npm install
+      - name: Set up Python for brand asset generation
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Generate official Fileport Windows icons
         run: |
           python -m pip install Pillow==11.3.0
