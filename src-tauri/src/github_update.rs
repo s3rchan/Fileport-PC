@@ -4,8 +4,8 @@ use std::{io::{Read,Write}, process::Command, time::Duration};
 use sha2::{Digest,Sha256};
 use tauri::{AppHandle,Emitter};
 
-const RELEASE_API:&str="https://api.github.com/repos/s3rchan/Fileport-PC-v1.6/releases/latest";
-const RELEASE_BASE:&str="https://github.com/s3rchan/Fileport-PC-v1.6/releases/download/";
+const RELEASE_API:&str="https://api.github.com/repos/s3rchan/Fileport-PC/releases/latest";
+const RELEASE_BASE:&str="https://github.com/s3rchan/Fileport-PC/releases/download/";
 const MAX_INSTALLER:u64=500*1024*1024;
 
 #[derive(Clone,Debug)]
