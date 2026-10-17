@@ -2,7 +2,6 @@
 window.addEventListener('DOMContentLoaded',()=>{
  'use strict';
  const $=id=>document.getElementById(id);
- const localButton=$('installLocalUpdate'),localStatus=$('localUpdateStatus');
  const checkButton=$('checkGithubUpdate'),installButton=$('installGithubUpdate');
  const status=$('githubUpdateStatus'),details=$('githubUpdateDetails'),progress=$('githubUpdateProgress');
  if(!checkButton||!installButton||!window.__TAURI__?.core?.invoke)return;
@@ -54,10 +53,4 @@ window.addEventListener('DOMContentLoaded',()=>{
   const value=Number(event.payload);
   if(Number.isFinite(value)&&value>=0&&value<=100){progress.value=value;setStatus(t('Downloading: ','İndiriliyor: ')+Math.round(value)+'%');}
  }).catch(()=>{});
- if(localButton){localButton.addEventListener('click',async()=>{
-  localButton.disabled=true;localStatus.textContent=t('Choose a signed Windows installer…','İmzalı Windows kurulum dosyasını seçin…');
-  try{const result=await invoke('install_local_update');
-   localStatus.textContent=result==='cancelled'?t('Selection cancelled.','Seçim iptal edildi.'):t('Installer opened. Complete Windows setup.','Kurulum açıldı. Windows kurulumunu tamamlayın.');
-  }catch(error){localStatus.textContent=String(error);}finally{localButton.disabled=false;}
- });}
 });
