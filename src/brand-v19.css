@@ -1,0 +1,81 @@
+/* Fileport PC v1.9 — approved minimal, high-contrast maritime UI. */
+:root{--fp-primary:#0637e7;--fp-blue:#368cff;--fp-navy:#01224f;--fp-pale:#cfe1f4;--fp-white:#fff;--fp-line:#e1e9f5;font-family:"Open Sauce Sans",system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--fp-navy)}
+body,.desktop-frame{background:#f3f8ff;color:var(--fp-navy)}
+.desktop-frame .side-nav{width:220px;flex:0 0 220px;background:linear-gradient(180deg,#052753 0%,#01224f 100%);padding:30px 14px 18px;color:#fff;gap:7px;min-height:0}
+.desktop-frame .side-brand{padding:4px 10px 32px;display:flex;gap:11px;align-items:center;font-size:20px;letter-spacing:-.7px;font-weight:750;color:#fff}
+.desktop-frame .side-brand img{width:39px;height:39px;max-width:none;max-height:none;filter:none}
+.desktop-frame .side-brand span{font-size:20px;letter-spacing:-.7px;color:#fff}
+.desktop-frame .nav-meta{font-size:10px;letter-spacing:2px;color:#86a9d7;padding:7px 17px 10px}
+.desktop-frame .side-item{display:flex;align-items:center;gap:14px;width:100%;font-size:13px;font-weight:600;min-height:46px;border-radius:10px;padding:11px 15px;color:#d5e4fb}
+.desktop-frame .side-item:hover{background:#13457f;color:white}
+.desktop-frame .side-item.active{background:var(--fp-primary);color:white;box-shadow:0 3px 11px #001a4780}
+.side-icon{display:inline-flex;align-items:center;justify-content:center;font-size:19px;width:22px;line-height:1}
+.desktop-frame .side-bottom{padding:20px 0 4px;margin-top:auto;text-align:center;border-top:1px solid #ffffff16;color:#4778b3;font-size:34px}
+.desktop-frame>.shell{background:#fff;padding:0;overflow:hidden;max-width:none;min-width:0}
+.desktop-frame .topbar{height:76px;min-height:76px;border-bottom:1px solid var(--fp-line);padding:0 27px;margin:0;background:#fff;gap:12px}
+.pc-device-bar{display:flex;align-items:center;gap:11px;font-weight:760;font-size:16px;min-width:0}
+#pcActiveDeviceName{max-width:min(55vw,460px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc-connection-dot{width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:#a5b5c9}
+.pc-connection-dot.connected{background:#16bb76;box-shadow:0 0 0 3px #16bb7618}
+.desktop-frame .top-note{font-size:11px;color:#7186a4;font-weight:600}
+.desktop-frame .workspace{padding:0}
+.desktop-frame .flow-panel{border:0!important;border-radius:0!important;box-shadow:none!important;background:#fff;margin:0!important;padding:0 24px 18px!important;min-width:0;min-height:0;overflow:hidden}
+.desktop-frame[data-view=chat] .flow-panel{display:flex!important;flex-direction:column;height:100%;background:#fff}
+.desktop-frame[data-view=chat] .flow-header{display:none!important}
+.desktop-frame[data-view=chat] .flow-conversation{flex:1;min-height:140px;background:#fff;border:0;border-radius:0;box-shadow:none;margin:0;padding:18px 0;gap:12px}
+.flow-empty{display:flex;flex-direction:column;gap:9px;align-items:center;justify-content:center;text-align:center;color:#778ba7}
+.flow-empty strong{color:#01224f;font-size:15px;font-weight:740}
+.flow-empty>span:last-child{font-size:12px;max-width:265px;line-height:1.65}
+.chat-empty-symbol{width:65px;height:65px;display:grid;place-items:center;color:#6a9bea;background:#ebf3ff;border-radius:20px;font-size:31px;margin-bottom:10px}
+.desktop-frame .flow-compose{display:flex;align-items:center;gap:10px;margin:0;padding:10px 0 0;border-top:1px solid #edf2f9;background:#fff}
+.desktop-frame .flow-compose input{height:48px;background:#f0f5ff;border:1px solid #e4ecf8;border-radius:24px;padding:0 19px;color:#01224f;font-size:13px;outline:none}
+.desktop-frame .flow-compose input:focus{border-color:#368cff;box-shadow:0 0 0 2px #368cff1e}
+.desktop-frame .flow-plus{height:43px;width:43px;flex-basis:43px;border-radius:50%;background:var(--fp-primary);font-size:24px}
+.desktop-frame #flowSendText{min-height:43px;padding:0 20px;border-radius:23px;background:var(--fp-primary);box-shadow:none;white-space:nowrap}
+.flow-bubble{background:#f3f7fd;color:#01224f;border-color:#e2eaf6}
+.flow-bubble.mine{background:var(--fp-primary);border-color:var(--fp-primary);color:white}
+.desktop-frame .trusted-devices{display:none;margin:24px 30px;border:0;box-shadow:none;padding:0;background:transparent;color:#01224f}
+.desktop-frame[data-view=devices] .trusted-devices{display:block!important;flex:1;min-height:0;overflow:auto}
+.trusted-devices h3{font-size:21px;font-weight:750;margin:0 0 9px;color:#01224f}
+.trusted-devices p{color:#778ba7;font-size:12px;margin-bottom:24px}
+.trusted-device-item{border:1px solid var(--fp-line);border-radius:15px;padding:18px;margin:10px 0;background:#fff;box-shadow:0 6px 20px #01224f09}
+.trusted-device-item .button{background:#eaf2ff;color:#0637e7;border:0;border-radius:12px}
+#desktopAddDevice{margin-top:14px;background:#0637e7;color:#fff;border-color:#0637e7;border-radius:11px;min-height:41px}
+.desktop-frame[data-view=history] .flow-panel{display:flex!important;overflow:auto;padding:22px 29px!important}
+.desktop-frame[data-view=history] .flow-history{display:block;width:100%;padding:0;overflow:auto}
+.desktop-frame[data-view=history] .flow-history h3{font-size:20px;color:#01224f;margin:3px 0 20px}
+.desktop-frame[data-view=history] .flow-history-item{padding:15px;min-height:53px;background:#f1f6ff;border:1px solid var(--fp-line);color:#19395f;border-radius:12px;margin-bottom:8px}
+.desktop-frame[data-view=settings] .desktop-settings{display:block!important;overflow:auto;flex:1;min-height:0;max-width:100%;width:100%;margin:0;padding:27px 33px;background:#fff;border-radius:0;box-shadow:none}
+.desktop-frame .settings-heading{font-size:23px;margin:0 0 22px;letter-spacing:-.5px;color:#01224f}
+.settings-card{display:flex;align-items:flex-start;gap:17px;border:1px solid var(--fp-line);border-radius:17px;padding:20px;margin-bottom:14px;background:#fff;box-shadow:0 7px 24px #01224f07;max-width:780px}
+.settings-card-symbol{width:41px;height:41px;flex:0 0 41px;border-radius:14px;background:#e9f2ff;color:var(--fp-primary);font-size:24px;display:grid;place-items:center}
+.settings-card-content{flex:1;min-width:0}
+.settings-card h3{font-size:16px;margin:0 0 6px;color:#01224f}
+.settings-card p{font-size:12px;line-height:1.6;margin:0 0 12px;color:#6c7f99}
+.desktop-frame .settings-language{margin:0;padding:0;border:none;justify-content:flex-start;gap:14px}
+.desktop-frame .settings-language label{display:none}
+.desktop-frame .settings-language select{min-height:39px;width:min(100%,320px);border-radius:9px;background:#f8faff;border:1px solid #d8e3f4;font-family:inherit}
+.desktop-frame .manual-update{padding:0;margin:0;border:0;background:none}
+.desktop-frame .manual-update button{background:#0637e7;color:white;border-radius:10px;min-height:39px;font:650 12px inherit}
+.desktop-frame .manual-update .update-actions{margin-top:13px}
+.desktop-frame .desktop-device-block{display:grid!important;gap:10px;max-width:360px}
+.desktop-frame .desktop-device-block label{font-size:13px;font-weight:700}
+.desktop-frame .desktop-device-block input{margin:0;padding:10px 13px;border:1px solid #d8e3f4;border-radius:10px;min-height:39px;color:#01224f;background:#f8faff}
+.desktop-frame .desktop-device-block button{min-height:39px;justify-self:start;background:#0637e7;color:white;border-color:#0637e7}
+.settings-footnote{color:#778ba7;font-size:11px;margin-top:16px}
+.desktop-frame .pairing-panel.flow-first-setup{background:#f1f6ff}
+.desktop-frame .pairing-screen.flow-setup-card{background:white;color:#01224f;border:1px solid #e1e9f5;box-shadow:0 22px 65px #01224f14}
+.desktop-frame .flow-first-setup h1{color:#01224f}
+.desktop-frame .flow-first-setup p{color:#667d9c}
+.desktop-frame .flow-setup-logo{width:65px;height:65px;margin:0;filter:none}
+.desktop-frame .flow-setup-card .button-primary{background:#0637e7;border-color:#0637e7}
+.desktop-frame .nearby-device{background:#eaf2ff;color:#01224f;border:1px solid #c9defb;padding:11px 16px}
+.desktop-frame .flow-reconnect{background:#01224f46}
+.desktop-frame .flow-reconnect-card{background:white;color:#01224f;border:1px solid #d6e6fa;box-shadow:0 20px 60px #01224f36;border-radius:21px}
+.desktop-frame .flow-reconnect-card h3{color:#01224f}
+.desktop-frame .flow-reconnect-card p,.desktop-frame .flow-reconnect-card small{color:#6c809b}
+.desktop-frame .flow-reconnect-icon{color:#0637e7}
+.desktop-frame .flow-reconnect-card .button-primary{background:#0637e7;border-color:#0637e7;border-radius:12px}
+#pcReconnectDevices{display:none!important}
+@media(max-width:850px){.desktop-frame .side-nav{width:165px;flex-basis:165px;padding-left:10px;padding-right:10px}.desktop-frame .side-item{gap:8px;padding:10px;font-size:12px}.desktop-frame .side-brand{gap:6px;font-size:17px;padding:5px 5px 25px}.desktop-frame .side-brand span{font-size:17px}.desktop-frame .trusted-devices{margin:16px}.desktop-frame[data-view=settings] .desktop-settings{padding:20px}.settings-card{padding:16px}}
+@media(prefers-reduced-motion:reduce){.desktop-frame *, .desktop-frame *::before, .desktop-frame *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
