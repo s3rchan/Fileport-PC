@@ -38,6 +38,10 @@ jobs:
           workspaces: src-tauri
       - name: Install JavaScript dependencies
         run: npm install
+      - name: Generate official Fileport Windows icons
+        run: |
+          python -m pip install Pillow==11.3.0
+          python scripts/generate_brand_icons.py
       - name: Run protocol tests
         run: npm test
       - name: Build NSIS installer
