@@ -5,7 +5,7 @@
  const reverse=Object.fromEntries(Object.entries(dictionary).map(([english,turkish])=>[turkish,english]));
  const cache=new WeakMap();
  const savedLanguage=localStorage.getItem('fileport-language');
- let language=(savedLanguage==='tr'||savedLanguage==='en')?savedLanguage:(navigator.language||'en').toLowerCase().startsWith('tr')?'tr':'en';
+ let language=(savedLanguage==='tr'||savedLanguage==='en')?savedLanguage:'en';
  function applyNode(node){
   if(node.nodeType!==Node.TEXT_NODE)return;
   const owner=node.parentElement;
