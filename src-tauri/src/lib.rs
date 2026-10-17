@@ -196,38 +196,12 @@ fn tcp_server(app:AppHandle,transport:Arc<Mutex<Option<Peer>>>,counter:Arc<Atomi
  }
  });
 }
-// Offline manual installer selection. Only a valid Authenticode-signed installer
-// signed by the same publisher certificate as the running application is accepted.
-#[tauri::command]
-fn install_local_update() -> Result<String,String> {
- #[cfg(not(target_os="windows"))]
- {return Err("Local installer updates are supported on Windows only".into());}
- #[cfg(target_os="windows")]
- {
-  use std::process::Command;
-  let picker=r#"Add-Type -AssemblyName System.Windows.Forms; $d=New-Object System.Windows.Forms.OpenFileDialog; $d.Title='Select Fileport update installer'; $d.Filter='Windows installer (*.exe)|*.exe'; $d.Multiselect=$false; if($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK){[Console]::Write($d.FileName)}"#;
-  let selected=Command::new("powershell.exe").args(["-NoProfile","-STA","-NonInteractive","-Command",picker]).output().map_err(|e|e.to_string())?;
-  if !selected.status.success(){return Err("Unable to open installer picker".into());}
-  let path=String::from_utf8(selected.stdout).map_err(|e|e.to_string())?.trim().to_string();
-  if path.is_empty(){return Ok("cancelled".into());}
-  let candidate=std::path::Path::new(&path);
-  if !candidate.is_file() || candidate.extension().and_then(|v|v.to_str()).map(|v|!v.eq_ignore_ascii_case("exe")).unwrap_or(true){return Err("Select an .exe installer".into());}
-  let current=std::env::current_exe().map_err(|e|e.to_string())?;
-  // No network and no command interpolation: file paths are environment values.
-  let verify=r#"$a=Get-AuthenticodeSignature -LiteralPath $env:FILEPORT_UPDATE; $b=Get-AuthenticodeSignature -LiteralPath $env:FILEPORT_CURRENT; if($a.Status -ne 'Valid' -or $b.Status -ne 'Valid' -or !$a.SignerCertificate -or !$b.SignerCertificate -or $a.SignerCertificate.Thumbprint -ne $b.SignerCertificate.Thumbprint){exit 12}; exit 0"#;
-  let checked=Command::new("powershell.exe").args(["-NoProfile","-NonInteractive","-Command",verify])
-    .env("FILEPORT_UPDATE",&path).env("FILEPORT_CURRENT",&current).status().map_err(|e|e.to_string())?;
-  if !checked.success(){return Err("Update rejected: both Fileport and installer must have a valid matching publisher signature".into());}
-  Command::new(candidate).spawn().map_err(|e|format!("Cannot start installer: {e}"))?;
-  Ok("started".into())
- }
-}
 #[cfg_attr(mobile,tauri::mobile_entry_point)]
 pub fn run(){
  let transport=Transport::default();let active=transport.current.clone();let counter=transport.counter.clone();
  tauri::Builder::default().manage(transport).manage(Transfers::default())
  .plugin(tauri_plugin_notification::init())
  .setup(move|app|{tcp_server(app.handle().clone(),active.clone(),counter.clone());lan_phone_listener(app.handle().clone());Ok(())})
- .invoke_handler(tauri::generate_handler![begin_download,append_download,sync_download,verify_download,finish_download,pause_download,abort_download,notify_received,transport_send,transport_close,install_local_update,github_update::check_github_update,github_update::install_github_update,send_phone_request,windows_device_name])
+ .invoke_handler(tauri::generate_handler![begin_download,append_download,sync_download,verify_download,finish_download,pause_download,abort_download,notify_received,transport_send,transport_close,github_update::check_github_update,github_update::install_github_update,send_phone_request,windows_device_name])
  .run(tauri::generate_context!()).expect("Fileport startup failed");
 }
