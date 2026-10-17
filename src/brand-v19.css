@@ -83,3 +83,6 @@ body,.desktop-frame{background:#f3f8ff;color:var(--fp-navy)}
 #pcReconnectDevices{display:none!important}
 @media(max-width:850px){.desktop-frame .side-nav{width:165px;flex-basis:165px;padding-left:10px;padding-right:10px}.desktop-frame .side-item{gap:8px;padding:10px;font-size:12px}.desktop-frame .side-brand{gap:6px;font-size:17px;padding:5px 5px 25px}.desktop-frame .side-brand span{font-size:17px}.desktop-frame .trusted-devices{margin:16px}.desktop-frame[data-view=settings] .desktop-settings{padding:20px}.settings-card{padding:16px}}
 @media(prefers-reduced-motion:reduce){.desktop-frame *, .desktop-frame *::before, .desktop-frame *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Keep all headings and controls on the approved font, including legacy widgets. */
+.desktop-frame,.desktop-frame button,.desktop-frame input,.desktop-frame select,.desktop-frame textarea,.desktop-frame h1,.desktop-frame h2,.desktop-frame h3,.secure-pair-card{font-family:"Open Sauce Sans",system-ui,-apple-system,"Segoe UI",sans-serif!important}
