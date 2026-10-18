@@ -121,3 +121,10 @@ body,.desktop-frame{background:#f3f8ff;color:var(--fp-navy)}
 .desktop-about .about-row strong{font-weight:650;text-align:right}
 .desktop-about .about-copyright{font-size:11px;opacity:.6;margin-top:35px}
 @media(max-width:850px){.desktop-frame[data-view=devices] .trusted-devices{max-width:calc(100% - 30px);width:calc(100% - 30px);margin:16px 15px}.desktop-frame[data-view=about] .desktop-about{padding:24px 18px}}
+
+.desktop-frame .topbar-brand{display:flex;align-items:center;flex:0 0 auto;min-width:0}
+.desktop-frame .topbar-brand img{width:122px;height:48px;max-width:100%;object-fit:contain;object-position:left center}
+.desktop-frame .topbar{justify-content:flex-start}
+.desktop-frame .pc-device-bar{margin-left:10px}
+.desktop-frame .top-note{margin-left:auto}
+@media(max-width:950px){.desktop-frame .topbar-brand img{width:95px}.desktop-frame .pc-device-bar{font-size:12px}.desktop-frame .top-note{display:none}}
