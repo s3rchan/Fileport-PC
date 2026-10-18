@@ -1,0 +1,53 @@
+name: Prepare Fileport source assets
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'package.json'
+      - 'src/branding/logo.png'
+      - 'scripts/generate_brand_icons.py'
+      - '.github/workflows/prepare-source-assets.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fileport-source-assets
+  cancel-in-progress: false
+
+jobs:
+  source-assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate current Tauri dependency lockfile
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Generate proportional multiresolution Windows icons
+        run: |
+          python -m pip install Pillow==11.3.0
+          python scripts/generate_brand_icons.py
+      - name: Commit generated source assets
+        shell: bash
+        run: |
+          git add -- package-lock.json src-tauri/icons/icon.png src-tauri/icons/icon.ico
+          if git diff --cached --quiet; then
+            echo 'Existing generated assets are already current.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'build(pc): pin Tauri dependencies and commit proportional Windows icons'
+          git push origin HEAD:main

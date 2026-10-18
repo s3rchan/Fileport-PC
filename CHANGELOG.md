@@ -2,6 +2,13 @@
 
 The historical version-specific README files were consolidated here on 18 October 2026. These entries describe past source milestones, not a guarantee that each historical binary was publicly released.
 
+## v1.9.2 — 18 October 2026 (source build)
+
+- Fixed the Windows taskbar icon aspect ratio: the official 150 × 168 mark now fits proportionally inside a transparent square without forced stretching.
+- Committed pre-generated `src-tauri/icons/icon.png` and `src-tauri/icons/icon.ico`, restoring out-of-the-box Rust/Tauri builds without Pillow.
+- Replaced the obsolete dependency lock with a current Tauri `package-lock.json` and switched Windows CI to `npm ci`.
+- Added a source-asset workflow to regenerate Windows icons and dependency lock when brand artwork, generator or package manifest changes.
+
 ## v1.9.1 — 18 October 2026 (source build)
 
 - Removed the unused legacy Yakın/WebRTC website and signaling server, including `public/` and `server.js`.

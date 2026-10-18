@@ -1,12 +1,13 @@
 {
   "name": "fileport-pc",
   "private": true,
-  "version": "1.9.1",
+  "version": "1.9.2",
   "type": "module",
   "scripts": {
-    "dev": "python scripts/generate_brand_icons.py && tauri dev",
-    "build": "python scripts/generate_brand_icons.py && tauri build",
-    "test": "node tests/fptp.integration.test.cjs && node tests/lan-request.test.cjs && node tests/pc-request.test.cjs && node tests/github-updater.test.cjs"
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "test": "node tests/fptp.integration.test.cjs && node tests/lan-request.test.cjs && node tests/pc-request.test.cjs && node tests/github-updater.test.cjs",
+    "icons": "python scripts/generate_brand_icons.py"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.2.0"

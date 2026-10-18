@@ -2,7 +2,7 @@
 
 **Fileport** connects your Windows PC directly to your Android phone for local file sharing and chat. It uses the same reachable Wi-Fi / LAN, not a cloud server.
 
-**Source version:** v1.9.1 (development build; a source build is not automatically a published Release).
+**Source version:** v1.9.2 (development build; a source build is not automatically a published Release).
 
 **Android companion:** [Fileport Android](https://github.com/s3rchan/Fileport-Android)  
 **Windows downloads:** [Official GitHub Releases](https://github.com/s3rchan/Fileport-PC/releases)  
@@ -29,19 +29,18 @@
 
 ## Build from source
 
-Requires Windows 10/11 (x64), Node.js 22, Rust/MSVC + WebView2 and Python 3 with Pillow.
+Requires Windows 10/11 (x64), Node.js 22, Rust/MSVC + WebView2. Python 3 with Pillow is needed only if regenerating icons; build-time font bundling uses Python in CI.
 
 ```powershell
-python -m pip install Pillow==11.3.0
 python scripts/install_brand_fonts.py
-npm install --no-package-lock
+npm ci
 npm test
 npm run build -- --bundles nsis
 ```
 
-The build and dev npm scripts first generate the Windows icon from `src/branding/logo.png`. This eliminates checked-in old binary icons and gives the taskbar/Start a full-size multi-resolution icon. On Windows, an older pinned shortcut may still have a cached icon: unpin and re-pin after installing the new EXE.
+The authoritative brand artwork is `src/branding/logo.png` (original 150 × 168 aspect ratio). The generated Windows binaries `src-tauri/icons/icon.png` and `src-tauri/icons/icon.ico` **are committed to this repository**, so `cargo build`, `cargo test`, `tauri dev` and `npm run build` do not need Pillow just for icons. You only need Python 3 with Pillow to **regenerate** the images after changing the official logo: `npm run icons`.
 
-`npm run dev` runs the same icon generation before opening Tauri.
+The icon generator crops only actual transparent edges, scales proportionally into a 512 × 512 transparent canvas with narrow padding, and exports 16, 24, 32, 48, 64, 128 and 256 px Windows icon sizes. It never stretches the artwork. Taskbar, Windows Explorer and pinned shortcuts may display cached icons until you unpin/re-pin or clear the Windows icon cache.
 
 ### Version policy (starting with v1.9.1)
 
@@ -53,7 +52,7 @@ The build and dev npm scripts first generate the Windows icon from `src/branding
 
 Run `python scripts/bump_version.py patch` or `python scripts/bump_version.py minor` **before committing a new product build**. The script synchronizes `package.json`, Tauri and Rust versions, the About screen and README. CI checks consistency with `--check`. Write the corresponding `CHANGELOG.md` entry before publication.
 
-The previous root `package-lock.json` was for a different WebRTC/`ws` project and was intentionally deleted; CI resolves the current Tauri dependencies using `npm install --no-package-lock`. A correct Tauri lockfile can be committed once generated and tested.
+The previous root `package-lock.json` was for a different WebRTC/`ws` project and was intentionally deleted; CI resolves the current Tauri dependencies using `npm install --no-package-lock`. Current Tauri dependencies are frozen in the npm lockfile.
 
 ## Release publishing
 
