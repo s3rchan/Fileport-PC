@@ -65,7 +65,7 @@ window.MusicPortHub={
  get ready(){return [...peers.values()].some(p=>p.session.verified&&p.ready);},
  get pending(){return [...peers.values()].some(p=>p.session.verified&&!p.ready&&!p.error);},
  get count(){return [...peers.values()].filter(p=>p.session.verified).length;},
- offer(f,id,n){file=f;trackId=id;trackName=n;const targets=[...peers.values()].filter(p=>p.session.verified);
+ offer(f,id,n){file=f;trackId=id;trackName=n;lastStarted=null;lastPosition=0;const targets=[...peers.values()].filter(p=>p.session.verified);
   for(const p of targets)p.ready=false;render();for(const p of targets)void sendAudio(p,f,id,n);return targets.length;},
  async play(at,position=0){lastStarted=at;lastPosition=position;await Promise.allSettled([...peers.values()].filter(p=>p.ready).map(p=>p.session.send({t:'music-play',id:trackId,at,offset:p.offset||0,position})));},
  async pause(position){lastStarted=null;lastPosition=position;await Promise.allSettled([...peers.values()].filter(p=>p.session.verified).map(p=>p.session.send({t:'music-pause',id:trackId,position})));},
