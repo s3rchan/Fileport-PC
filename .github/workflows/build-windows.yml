@@ -36,18 +36,18 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
-      - name: Install JavaScript dependencies (legacy lockfile removed)
-        run: npm install --no-package-lock
-      - name: Set up Python for brand asset generation
+      - name: Install locked JavaScript dependencies
+        run: npm ci
+      - name: Verify committed Windows icons are available to bare Rust/Tauri builds
+        shell: pwsh
+        run: |
+          if (!(Test-Path src-tauri/icons/icon.ico) -or !(Test-Path src-tauri/icons/icon.png)) { throw "Committed Fileport Windows icons are missing" }
+      - name: Set up Python for offline Open Sauce font bundling
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Generate official Fileport Windows icons
-        run: |
-          python -m pip install Pillow==11.3.0
-          python scripts/generate_brand_icons.py
-          python scripts/install_brand_fonts.py
+      - name: Bundle offline Open Sauce fonts
+        run: python scripts/install_brand_fonts.py
       - name: Verify release version consistency
         run: python scripts/bump_version.py --check
       - name: Run protocol tests
