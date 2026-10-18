@@ -36,7 +36,7 @@ pub fn start(app:AppHandle,peers:Arc<Mutex<HashMap<u64,TcpStream>>>,next:Arc<Ato
    if !stream.peer_addr().map(|x|local(x.ip())).unwrap_or(false){let _=stream.shutdown(Shutdown::Both);continue;}
    let count=peers.lock().map(|g|g.len()).unwrap_or(8);if count>=8{let _=stream.shutdown(Shutdown::Both);continue;}
    let id=next.fetch_add(1,Ordering::SeqCst)+1;let _=stream.set_nodelay(true);
-   let _=stream.set_read_timeout(Some(Duration::from_secs(35)));
+   let _=stream.set_read_timeout(Some(Duration::from_secs(135)));
    let _=stream.set_write_timeout(Some(Duration::from_secs(8)));
    let writer=match stream.try_clone(){Ok(v)=>v,Err(_)=>continue};
    peers.lock().unwrap().insert(id,writer);
