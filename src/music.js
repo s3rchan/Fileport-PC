@@ -44,7 +44,9 @@
  }
  function displayTrack(track){if(name)name.textContent=track;}
  if(pick&&fileInput)pick.addEventListener('click',()=>{if(wire()?.connected)fileInput.click();else fail(text('Connect your phone first.','Önce telefona bağlanın.'));});
- if(fileInput)fileInput.addEventListener('change',()=>{if(share)share.disabled=!fileInput.files?.length||!wire()?.connected;});
+ if(fileInput)fileInput.addEventListener('change',()=>{
+  if(share){share.disabled=!fileInput.files?.length||!wire()?.connected;if(!share.disabled)share.click();}
+ });
  if(share)share.addEventListener('click',async()=>{
   const file=fileInput?.files?.[0];
   if(!wire()?.connected){fail(text('Connect your phone first.','Önce telefona bağlanın.'));return;}
