@@ -2,7 +2,7 @@
 
 **Fileport** connects your Windows PC directly to your Android phone for local file sharing and chat. It uses the same reachable Wi-Fi / LAN, not a cloud server.
 
-**Source version:** v1.9.2 (development build; a source build is not automatically a published Release).
+**Source version:** v1.9.3 (development build; a source build is not automatically a published Release).
 
 **Android companion:** [Fileport Android](https://github.com/s3rchan/Fileport-Android)  
 **Windows downloads:** [Official GitHub Releases](https://github.com/s3rchan/Fileport-PC/releases)  
@@ -16,6 +16,7 @@
 - Device and connection history stored locally.
 - Built-in online update checks through the official GitHub Releases repository.
 - English and Turkish language settings, About screen, and official Fileport branding.
+- **Music Share (PC → Android):** Choose music on the PC, request phone consent before transfer, send over the authenticated encrypted channel, then press Play on either device to start both players approximately together.
 
 ## Installation and pairing
 
@@ -71,3 +72,10 @@ Old WebRTC website/server sources, obsolete deployment/reflect-screen instructio
 FPTP/1 is a custom encrypted application protocol, **not an independently audited security implementation**. Verify first-time pairing codes and approve only trusted devices. Current Windows installers are unsigned unless an Authenticode signing certificate is provided. Real PC/Android transfer and update tests remain essential before public Release distribution.
 
 © 2026 Fileport.
+
+
+## Music Share (v1.9.3 development)
+
+Open **Music** in the Windows sidebar and click **Music Share**. Select an MP3, M4A, WAV, OGG or FLAC audio file up to 150 MB. The Android app displays the file name and size and must approve before the PC sends any file content. Once the file is saved to Android Downloads and both decoders report readiness, either device can press **Play on both** or **Stop**. Playback uses a shared command over the existing authenticated FPTP/1 connection and a 1.6-second scheduling lead time; it is **approximate**, not sample-accurate synchronized audio.
+
+No music is streamed before approval. To use this feature, upgrade **both** Windows (v1.9.3+) and Android (v3.0.2+) clients. Keep the applications open and both devices connected while listening. Unsupported codecs may be rejected by the operating system.

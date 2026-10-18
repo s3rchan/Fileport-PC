@@ -2,6 +2,14 @@
 
 The historical version-specific README files were consolidated here on 18 October 2026. These entries describe past source milestones, not a guarantee that each historical binary was publicly released.
 
+## v1.9.3 — 18 October 2026 (development build)
+
+- Added Music tab with **Music Share** file picker and explicit Android accept/decline before any music file bytes are sent.
+- Reused authenticated encrypted FPTP file transfers, with Android native MediaPlayer reading the verified local Downloads URI.
+- Added two-device Play/Stop controls using a shared LAN command with a 1.6-second playback lead time.
+- Added regression coverage for consent gating, verified file readiness and player control.
+- Playback sync is approximate; real Windows/Android latency tests remain necessary.
+
 ## v1.9.2 — 18 October 2026 (source build)
 
 - Fixed the Windows taskbar icon aspect ratio: the official 150 × 168 mark now fits proportionally inside a transparent square without forced stretching.
