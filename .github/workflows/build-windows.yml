@@ -79,7 +79,10 @@ jobs:
           fail_on_unmatched_files: true
 
       - name: Publish Fileport Windows release from tagged merge or manual run
-        if: (github.event_name == 'workflow_dispatch' && inputs.publish_release) || (github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'release: Fileport PC v1.9.4'))
+        if: >-
+          (github.event_name == 'workflow_dispatch' && inputs.publish_release) ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+          startsWith(github.event.head_commit.message, 'release: Fileport PC v1.9.4'))
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
