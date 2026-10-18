@@ -19,7 +19,7 @@
  }
  function showDevices(){
   // Bound the discovery cache even after long-running LAN sessions.
-  const now=Date.now();for(const [id,phone] of nearby)if(now-phone.lastSeen>45000)nearby.delete(id);
+  const now=Date.now();for(const [id,phone] of nearby)if(now-phone.lastSeen>300000)nearby.delete(id);
   const list=$('desktopNearbyPhones');list.replaceChildren();
   for(const phone of recentPhones()){
    if(trusted().some(p=>p.id===phone.id))continue;
@@ -66,7 +66,9 @@
  async function pulse(a){
   if(attempt!==a||online||a.running)return;
   const phone=nearby.get(a.id);
-  if(!phone||Date.now()-phone.lastSeen>14000){
+  // A recently paired IP can be retried while fresh discovery catches up.
+  // The signed target ID still prevents pairing with an unrelated phone.
+  if(!phone||Date.now()-phone.lastSeen>300000){
    $('pcReconnectInfo').textContent=txt('Telefon bulunamadı. Telefonunuzda Fileport’u açın.','Phone not detected. Open Fileport on the phone.');
    return;
   }
@@ -95,6 +97,7 @@
   if(!p||!/^[a-f0-9]{64}$/.test(p.id)||typeof p.address!=='string')return;
   const safe=String(p.name||'Android phone').replace(/[\x00-\x1f]/g,'').slice(0,32)||'Android phone';
   nearby.set(p.id,{...p,name:safe,lastSeen:Date.now()});showDevices();
+  if(attempt&&attempt.id===p.id&&!attempt.running)void pulse(attempt);
  });
  window.addEventListener('fileport-peer-connected',()=>{
   online=true;lastPeer=window.FileportConnection.peerId||lastPeer;
