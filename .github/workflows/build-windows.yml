@@ -82,7 +82,7 @@ jobs:
         if: >-
           (github.event_name == 'workflow_dispatch' && inputs.publish_release) ||
           (github.event_name == 'push' && github.ref == 'refs/heads/main' &&
-          startsWith(github.event.head_commit.message, 'release: Fileport PC v1.9.4'))
+          startsWith(github.event.head_commit.message, 'release: Fileport PC v'))
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
