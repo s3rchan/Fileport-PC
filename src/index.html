@@ -8,7 +8,7 @@
 <title>Fileport — Local File Transfer</title>
 <link rel="icon" type="image/png" href="branding/logo.png"/>
 <link href="styles.css" rel="stylesheet"/>
-<script defer="" src="i18n.js"></script><script defer="" src="pairing.js"></script><script defer="" src="sha256-stream.js"></script><script defer="" src="app.js"></script><script defer="" src="flow.js"></script><script defer="" src="desktop.js"></script>
+<script defer="" src="i18n.js"></script><script defer="" src="pairing.js"></script><script defer="" src="sha256-stream.js"></script><script defer="" src="app.js"></script><script defer="" src="music.js"></script><script defer="" src="flow.js"></script><script defer="" src="desktop.js"></script>
 <style>
  .connection-internals { position:absolute!important; width:1px!important; height:1px!important; overflow:hidden!important; clip-path:inset(50%)!important; }
  .language-picker,.nav-language-section {display:flex;align-items:center;gap:8px;font-size:12px;}
@@ -19,7 +19,7 @@
  .side-brand img,.desktop-top-brand img,.brand-wordmark {filter:none!important;mix-blend-mode:normal!important;object-fit:contain}
  </style><link rel="stylesheet" href="brand-v19.css"/></head>
 <body>
-<div class="desktop-frame"><aside class="side-nav"><div class="side-brand"><img src="branding/logo2.png" alt="Fileport"/></div><div class="nav-meta">FILEPORT</div><button class="side-item active" data-view="chat">Chat</button><button class="side-item" data-view="devices">Devices</button><button class="side-item" data-view="history">History</button><button class="side-item" data-view="settings">Settings</button><button class="side-item" data-view="about">About</button><div class="side-bottom"><img alt="" src="branding/logo.detail.png"/></div></aside><main class="shell">
+<div class="desktop-frame"><aside class="side-nav"><div class="side-brand"><img src="branding/logo2.png" alt="Fileport"/></div><div class="nav-meta">FILEPORT</div><button class="side-item active" data-view="chat">Chat</button><button class="side-item" data-view="devices">Devices</button><button class="side-item" data-view="history">History</button><button class="side-item" data-view="music">Music</button><button class="side-item" data-view="settings">Settings</button><button class="side-item" data-view="about">About</button><div class="side-bottom"><img alt="" src="branding/logo.detail.png"/></div></aside><main class="shell">
 <header class="topbar"><div class="topbar-brand"><img alt="Fileport" src="branding/logo5.png"/></div><div class="pc-device-bar"><span id="pcActiveDeviceName">Fileport</span><span class="pc-connection-dot" id="pcConnectionDot" aria-label="Connection status"></span></div><span class="top-note">Local Wi-Fi / LAN</span></header>
 <section aria-label="Dosya paylaşım odası" class="workspace">
 <div class="connection-internals" id="connectionInternals"><div class="connection-badge" id="connectionBadge"><span id="connectionText"></span></div><div id="connectionStatus" role="status"></div></div>
@@ -79,6 +79,25 @@
  <p>Fileport connects a Windows computer and an Android device on the same reachable local network. File transfers and messages travel directly between paired devices, without cloud storage.</p>
  <p>FPTP/1 encryption is experimental and has not undergone an independent third-party security audit. Always verify the six-digit pairing code.</p>
  <p class="about-copyright">© 2026 Fileport · Official design identity</p>
+</section><section class="desktop-music" id="desktopMusic" aria-label="Music Share" hidden>
+ <div class="music-hero"><span class="music-note" aria-hidden="true">♫</span><div><h2>Music Share</h2><p>Share a music file with your connected phone and listen together.</p></div></div>
+ <div class="music-card">
+  <h3>Choose music</h3>
+  <p>Your phone will be asked for permission before the audio file is sent.</p>
+  <button class="button button-primary" id="musicPick" type="button">Music Share</button>
+  <button id="musicShare" type="button" hidden>Send selected music</button>
+  <input type="file" id="musicFileInput" accept=".mp3,.m4a,.wav,.ogg,.oga,.flac,audio/*" hidden/>
+ </div>
+ <div class="music-card">
+  <h3 id="musicTrackName">No music selected</h3>
+  <p id="musicStatus" role="status" aria-live="polite">Connect your devices to share music.</p>
+  <div class="music-controls">
+   <button class="button button-primary" id="musicPlay" disabled type="button">▶ Play on both</button>
+   <button class="button button-outline" id="musicStop" disabled type="button">■ Stop</button>
+  </div>
+  <audio id="musicAudio" preload="auto" hidden></audio>
+ </div>
+ <p class="music-footnote">Supports MP3, M4A, WAV, OGG and FLAC files up to 150 MB. Playback starts approximately together on your local Wi-Fi.</p>
 </section></main></div>
 <div class="toast hidden" id="toast" role="status"></div>
 <div aria-labelledby="securePairTitle" aria-modal="true" class="secure-pair-overlay hidden" id="securePairOverlay" role="dialog"><section class="secure-pair-card"><div class="secure-pair-top">FILEPORT · SECURE PAIRING</div><h2 id="securePairTitle">Select your device</h2><p id="securePairMessage">Confirm the passkey to connect to your phone. Approve the matching code on both devices.</p><div class="secure-pair-code" id="securePairCode">······</div><div class="secure-pair-info" id="securePairInfo">Preparing code…</div><div class="secure-pair-actions"><button class="button button-outline" id="securePairReject" type="button">Cancel</button><button class="button button-primary" disabled="" id="securePairApprove" type="button">OK</button></div></section></div><script src="manual-update.js"></script></body>
