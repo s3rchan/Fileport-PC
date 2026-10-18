@@ -2,7 +2,7 @@
 
 **Fileport** connects your Windows PC directly to your Android phone for local file sharing and chat. It uses the same reachable Wi-Fi / LAN, not a cloud server.
 
-**Source version:** v1.9.4 (development build; a source build is not automatically a published Release).
+**Source version:** v1.9.5 (development build; a source build is not automatically a published Release).
 
 **Android companion:** [Fileport Android](https://github.com/s3rchan/Fileport-Android)  
 **Windows downloads:** [Official GitHub Releases](https://github.com/s3rchan/Fileport-PC/releases)  
@@ -16,7 +16,6 @@
 - Device and connection history stored locally.
 - Built-in online update checks through the official GitHub Releases repository.
 - English and Turkish language settings, About screen, and official Fileport branding.
-- **Music Share (PC → Android):** Choose music on the PC, request phone consent before transfer, send over the authenticated encrypted channel, then press Play on either device to start both players approximately together.
 
 ## Installation and pairing
 
@@ -74,8 +73,7 @@ FPTP/1 is a custom encrypted application protocol, **not an independently audite
 © 2026 Fileport.
 
 
-## Music Share (v1.9.3 development)
 
-Open **Music** in the Windows sidebar and click **Music Share**. Select an MP3, M4A, WAV, OGG or FLAC audio file up to 150 MB. The Android app displays the file name and size and must approve before the PC sends any file content. Once the file is saved to Android Downloads and both decoders report readiness, either device can press **Play on both** or **Stop**. Playback uses a shared command over the existing authenticated FPTP/1 connection and a 1.6-second scheduling lead time; it is **approximate**, not sample-accurate synchronized audio.
+## Update signing
 
-No music is streamed before approval. To use this feature, upgrade **both** Windows (v1.9.3+) and Android (v3.0.2+) clients. Keep the applications open and both devices connected while listening. Unsupported codecs may be rejected by the operating system.
+In-app updates download GitHub Releases. The Windows publisher signature must remain stable across signed releases; a differently signed existing installation cannot be updated by bypassing this check. Use a one-time manual migration only after backing up existing data when a signer changes.

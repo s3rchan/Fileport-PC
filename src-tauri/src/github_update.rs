@@ -96,7 +96,7 @@ fn verify_publisher(candidate:&std::path::Path)->Result<(),String>{
   .args(["-NoProfile","-NonInteractive","-Command",script])
   .env("FILEPORT_CURRENT",current).env("FILEPORT_UPDATE",candidate)
   .status().map_err(|e|format!("Cannot verify Windows installer signature: {e}"))?;
- if !status.success(){return Err("Installer publisher signature validation failed; a signed build cannot update to an unsigned or different-publisher build".into());}
+ if !status.success(){return Err("Update blocked: the installed Windows app and the downloaded installer have different publisher identities (or the new installer is unsigned). Keep the same code-signing certificate for all future releases. A one-time manual migration may be required.".into());}
  Ok(())
 }
 

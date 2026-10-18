@@ -129,26 +129,3 @@ body,.desktop-frame{background:#f3f8ff;color:var(--fp-navy)}
 .desktop-frame .top-note{margin-left:auto}
 @media(max-width:950px){.desktop-frame .topbar-brand img{width:95px}.desktop-frame .pc-device-bar{font-size:12px}.desktop-frame .top-note{display:none}}
 
-/* Music Share — uses existing Fileport brand colors and spacing. */
-.desktop-music[hidden]{display:none!important}
-.desktop-frame[data-view=music] .workspace,
-.desktop-frame[data-view=music] .flow-panel,
-.desktop-frame[data-view=music] .trusted-devices,
-.desktop-frame[data-view=music] .desktop-settings,
-.desktop-frame[data-view=music] .desktop-about,
-.desktop-frame[data-view=music] .pairing-panel{display:none!important}
-.desktop-frame[data-view=music] .desktop-music{
- display:block!important;flex:1;min-height:0;overflow-y:auto;padding:30px 36px;max-width:820px;
-}
-.music-hero{display:flex;align-items:center;gap:19px;margin:0 0 24px}
-.music-note{display:grid;place-items:center;flex-shrink:0;width:54px;height:54px;border-radius:17px;background:#eaf2ff;color:var(--fp-primary);font-size:27px}
-.desktop-music h2{font-size:25px;font-weight:750;margin:0 0 5px;color:var(--fp-navy)}
-.desktop-music h3{font-size:17px;font-weight:700;margin:0 0 7px;color:var(--fp-navy);overflow-wrap:anywhere}
-.desktop-music p{line-height:1.6;color:#7186a4;font-size:13px;margin:0 0 17px}
-.desktop-music .music-card{border:1px solid var(--fp-line);background:#fff;border-radius:17px;padding:22px 24px;margin:0 0 16px;box-shadow:0 6px 24px #01224f07}
-.music-controls{display:flex;align-items:center;flex-wrap:wrap;gap:12px}
-.desktop-music button,.music-offer-card button{min-height:42px;border-radius:12px;padding:0 18px}
-.desktop-music button.button-primary,.music-offer-card button.button-primary{background:var(--fp-primary);color:#fff;border-color:var(--fp-primary)}
-.desktop-music button:disabled,.music-offer-card button:disabled{opacity:.45;cursor:not-allowed}
-.desktop-music .music-footnote{font-size:11px;margin:17px 0}
-@media(max-width:850px){.desktop-frame[data-view=music] .desktop-music{padding:20px 17px}.desktop-music .music-card{padding:18px}}

@@ -14,7 +14,7 @@
   begin:async(name,size,mime,id)=>Number(window.FileportNative.beginDownload(name,mime,size,id)),
   append:async(id,offset,b64)=>Number(window.FileportNative.appendDownload(id,offset,b64)),
   sync:async id=>Number(window.FileportNative.syncDownload(id)),
-  finish:async (id,music)=>music?window.FileportNative.finishMusicDownload(id):window.FileportNative.finishDownload(id),
+  finish:async id=>window.FileportNative.finishDownload(id),
   verify:async(id,digest)=>window.FileportNative.verifyDownload(id,digest),
   pause:async id=>window.FileportNative.pauseDownload(id),
   abort:async id=>window.FileportNative.abortDownload(id)
@@ -31,7 +31,8 @@
  let sendWait=null,ackWait=null,receiptWait=null,retryTimer=null,heartbeat=null,closing=false;
  let filesPending=[];
  let retries=0;
- let musicOutgoingId=null;
+ // Migration cleanup: remove saved trust records for the retired receiver subsystem.
+ try{localStorage.removeItem('musicport-trusted-v1');}catch{}
  const recentIdsKey='fileport-fptp-resume-v1';
  function setTransferActive(value){window.FileportTransferActive=!!value;if(ANDROID)window.FileportNative.setTransferActive(!!value);}
  const hex=identity.hex;
@@ -57,8 +58,6 @@
   const old=session;if(!old||old.closed)return;old.closed=true;clearInterval(heartbeat);clearTimeout(old.timeout);heartbeat=null;window.FileportConnection.currentPeerId=null;
   resetWaits(reason);if(incoming){const item=incoming;incoming=null;void nativeFile.pause(item.id).catch(()=>{});window.FileportFlow?.transferPause?.(item.cardId);}
   if(currentOutgoing)window.FileportFlow?.transferPause?.(currentOutgoing.cardId);
-  if(musicOutgoingId){musicOutgoingId=null;filesPending=[];}
-  window.FileportMusic?.disconnected?.();
   setTransferActive(!!sending);session=null;refreshSend();alertDisconnect(reason);
  }
  async function openSession(){
@@ -212,16 +211,11 @@
   if(p.t==='ping'){await sendPacket({t:'pong'});return;}
   if(p.t==='pong')return;
   if(p.t==='text'){if(typeof p.text==='string'&&p.text.length<=2000)window.FileportFlow?.incomingText(p.text);return;}
-  if(['music-offer','music-accept','music-decline','music-ready','music-error','music-play','music-stop','music-pause','music-clock-ping','music-clock-pong'].includes(p.t)){
-   await window.FileportMusic?.handlePacket?.(p);return;
-  }
   if(p.t==='file-start'){
    if(incoming){await sendPacket({t:'file-error',id:p.id,message:'Another file is being received'});return;}
-   if(p.music===true && !window.FileportMusic?.allowIncoming?.(p)){
-    await sendPacket({t:'file-error',id:p.id,message:'Music approval required'});return;
-   }
+   if(Object.keys(p).some(k=>!['t','id','name','mime','size'].includes(k))){await sendPacket({t:'file-error',id:p.id,message:'Unsupported file metadata'});return;}
    if(!/^[a-f0-9]{32}$/.test(p.id)||!Number.isSafeInteger(p.size)||p.size<0||p.size>MAX_FILE){await sendPacket({t:'file-error',id:p.id,message:'Invalid transfer request'});return;}
-   const item={id:p.id,name:safeName(p.name),mime:String(p.mime||'application/octet-stream'),size:p.size,music:p.music===true,received:0,cardId:null};
+   const item={id:p.id,name:safeName(p.name),mime:String(p.mime||'application/octet-stream'),size:p.size,received:0,cardId:null};
    incoming=item;setTransferActive(true);
    item.cardId=window.FileportFlow?.transferBegin('receive',item.name,readable(item.size));
    ui.incoming?.classList.remove('hidden');ui.receiveEmpty?.classList.add('hidden');ui.incomingName.textContent=item.name;
@@ -248,11 +242,10 @@
    try{if(typeof p.sha256!=='string'||!(/^[a-f0-9]{64}$/).test(p.sha256))throw Error('Missing SHA-256 checksum');
     window.FileportFlow?.transferSaving(item.cardId);await nativeFile.sync(item.id);
     const valid=await nativeFile.verify(item.id,p.sha256);if(valid!==true)throw Error('SHA-256 mismatch');
-    await nativeFile.finish(item.id,item.music);
+    await nativeFile.finish(item.id);
     incoming=null;setTransferActive(sending);
     window.FileportFlow?.transferFinish(item.cardId,true);ui.incoming?.classList.add('hidden');
     await sendPacket({t:'file-complete',id:item.id});
-    if(item.music)await window.FileportMusic?.fileReceived?.(item.id);
     if(!ANDROID&&document.hidden)await invoke('notify_received',{filename:item.name}).catch(()=>{});
    }catch(error){await reportReceiveError(item,error.message);}
    return;
@@ -280,10 +273,10 @@
   try{
    for(const file of [...filesPending]){
     if(file.size>MAX_FILE)throw Error('File exceeds 1 GB');
-    const id=musicOutgoingId||transferId(file),isMusic=musicOutgoingId===id;
+    const id=transferId(file);
     const cardId=window.FileportFlow?.transferBegin('send',safeName(file.name),readable(file.size));
     currentOutgoing={file,id,cardId};sendWait=deferred();
-    await sendPacket({t:'file-start',id,name:safeName(file.name),size:file.size,mime:file.type||'application/octet-stream',...(isMusic?{music:true}:{})});
+    await sendPacket({t:'file-start',id,name:safeName(file.name),size:file.size,mime:file.type||'application/octet-stream'});
     let offset=await sendWait.promise;sendWait=null;
     if(!Number.isSafeInteger(offset)||offset<0||offset>file.size)throw Error('Invalid resume offset');
     statusTransfer(cardId,file.size?offset/file.size*100:0);
@@ -305,8 +298,7 @@
     receiptWait=deferred(70000);window.FileportFlow?.transferSaving(cardId);
     await sendPacket({t:'file-end',id,sha256:fileHash.digest()});await receiptWait.promise;receiptWait=null;
     window.FileportFlow?.transferFinish(cardId,true);
-    if(isMusic){musicOutgoingId=null;window.FileportMusic?.fileSent?.(id);}
-    else removeTransferId(file);
+    removeTransferId(file);
     currentOutgoing=null;filesPending.shift();retries=0;
    }
    selected=[];filesPending=[];retries=0;ui.input.value='';setFiles([]);toast('All files saved on receiving device');
@@ -348,16 +340,6 @@
  window.addEventListener('drop',event=>{if(Array.from(event.dataTransfer?.types||[]).includes('Files'))event.preventDefault();});
  window.FileportConnection={host,connectDevice,disconnect:()=>{void closeTransport();dropConnection('Disconnected');},pickFiles:()=>ui.input.click(),get connected(){return !!session?.verified;},get peerId(){return session?.remote?.id||null;}};
  window.FileportFlowTransport={sendText(text){if(!session?.verified)throw Error('Device is not authenticated');void sendPacket({t:'text',text:String(text).slice(0,2000)}).catch(e=>status(e.message,true));}};
- window.FileportMusicTransport={
-  get connected(){return !!session?.verified;},
-  send(packet){if(!session?.verified)return Promise.reject(Error('Connect a trusted device first'));return sendPacket(packet);},
-  sendMusic(file,id){
-   if(!session?.verified||sending||filesPending.length||incoming||musicOutgoingId)return Promise.reject(Error('Another transfer is already active'));
-   if(!file||!(/^[a-f0-9]{32}$/).test(id))return Promise.reject(Error('Invalid music file or offer ID'));
-   musicOutgoingId=id;
-   return sendFiles([file]);
-  }
- };
  window.FileportInternal={sendFiles:()=>ui.send.click(),pickFiles:()=>ui.input.click(),get connected(){return !!session?.verified;},get peerId(){return session?.remote?.id||null;}};
  window.FileportDisconnectIfIdle=()=>{if(!window.FileportTransferActive)window.FileportConnection.disconnect();};
  // When backgrounded, disconnect only after 3 minutes of inactivity.

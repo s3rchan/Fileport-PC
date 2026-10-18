@@ -2,7 +2,6 @@
 //! the shared WebCrypto FPTP codec; this native socket transports opaque frames.
 
 mod github_update;
-mod musicport;
 use std::{collections::HashMap,fs::{self,File,OpenOptions},io::{Read,Write},net::{TcpListener,TcpStream,Shutdown,UdpSocket},path::PathBuf,sync::{Arc,Mutex,atomic::{AtomicU64,Ordering}},thread,time::Duration};
 use base64::Engine;
 use tauri::{AppHandle,Emitter,State};
@@ -200,10 +199,9 @@ fn tcp_server(app:AppHandle,transport:Arc<Mutex<Option<Peer>>>,counter:Arc<Atomi
 #[cfg_attr(mobile,tauri::mobile_entry_point)]
 pub fn run(){
  let transport=Transport::default();let active=transport.current.clone();let counter=transport.counter.clone();
- let music_hub=musicport::Hub::default();let music_peers=music_hub.peers.clone();let music_next=music_hub.next.clone();
- tauri::Builder::default().manage(transport).manage(Transfers::default()).manage(music_hub)
+ tauri::Builder::default().manage(transport).manage(Transfers::default())
  .plugin(tauri_plugin_notification::init())
- .setup(move|app|{tcp_server(app.handle().clone(),active.clone(),counter.clone());lan_phone_listener(app.handle().clone());musicport::start(app.handle().clone(),music_peers.clone(),music_next.clone());Ok(())})
- .invoke_handler(tauri::generate_handler![begin_download,append_download,sync_download,verify_download,finish_download,pause_download,abort_download,notify_received,transport_send,transport_close,github_update::check_github_update,github_update::install_github_update,send_phone_request,windows_device_name,musicport::musicport_send,musicport::musicport_close,musicport::musicport_local_ip])
+ .setup(move|app|{tcp_server(app.handle().clone(),active.clone(),counter.clone());lan_phone_listener(app.handle().clone());Ok(())})
+ .invoke_handler(tauri::generate_handler![begin_download,append_download,sync_download,verify_download,finish_download,pause_download,abort_download,notify_received,transport_send,transport_close,github_update::check_github_update,github_update::install_github_update,send_phone_request,windows_device_name])
  .run(tauri::generate_context!()).expect("Fileport startup failed");
 }

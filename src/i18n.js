@@ -12,25 +12,6 @@
  "FPTP/1 encryption is experimental and has not undergone an independent third-party security audit. Always verify the six-digit pairing code.":"FPTP/1 şifrelemesi deneyseldir ve bağımsız bir güvenlik denetiminden geçmemiştir. Altı haneli eşleştirme kodunu mutlaka doğrulayın.",
  "Official design identity":"Resmî marka kimliği"
  });
- Object.assign(dictionary,{
-  "Music":"Müzik",
-  "Music Share":"Müzik Paylaşımı",
-  "Share a music file with your connected phone and listen together.":"Bağlı telefonunuzla müzik paylaşın ve birlikte dinleyin.",
-  "Choose music":"Müzik seç",
-  "Your phone will be asked for permission before the audio file is sent.":"Ses dosyası gönderilmeden önce telefonunuzdan onay istenir.",
-  "No music selected":"Müzik seçilmedi",
-  "Connect your devices to share music.":"Müzik paylaşmak için cihazları bağlayın.",
-  "▶ Play on both":"▶ İki cihazda çal",
-  "■ Stop":"■ Durdur",
-  "Supports MP3, M4A, WAV, OGG and FLAC files up to 150 MB. Playback starts approximately together on your local Wi-Fi.":"150 MB'a kadar MP3, M4A, WAV, OGG ve FLAC desteklenir. Oynatma yerel Wi-Fi üzerinden yaklaşık aynı anda başlar.",
-  "Waiting for your PC to share music.":"Bilgisayarınızdan müzik bekleniyor.",
-  "Your computer sends a permission request first. Music is saved locally before playback.":"Bilgisayar önce onay ister. Müzik oynatılmadan önce cihaza kaydedilir.",
-  "Music Share request":"Müzik Paylaşımı isteği",
-  "Your computer wants to send a music file. Accept?":"Bilgisayarınız müzik dosyası göndermek istiyor. Kabul ediyor musunuz?",
-  "Decline":"Reddet",
-  "Accept music":"Müziği kabul et",
-  "Music is ready on both devices. Press Play.":"Müzik iki cihazda hazır. Play tuşuna basın."
- });
  const reverse=Object.fromEntries(Object.entries(dictionary).map(([english,turkish])=>[turkish,english]));
  const cache=new WeakMap();
  const savedLanguage=localStorage.getItem('fileport-language');
