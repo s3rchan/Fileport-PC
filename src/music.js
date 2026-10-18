@@ -53,7 +53,7 @@
   if(outgoing){fail(text('Wait for the previous music offer.','Önceki müzik isteğini bekleyin.'));return;}
   if(!allowedFile(file)){fail(text('Choose an MP3, M4A, WAV, OGG or FLAC file up to 150 MB.','En fazla 150 MB MP3, M4A, WAV, OGG veya FLAC seçin.'));return;}
   clearTrack();trackId=freshId();
-  const safeName=file.name.replace(/[\u0000-\u001f\u007f<>:"/\\|?*]/g,'_').slice(0,150);
+  const safeName=file.name.replace(/[\u0000-\u001f\u007f<>:"/\\|?*]/g,'_').replace(/^[. ]+|[. ]+$/g,'').slice(0,150);
   outgoing={id:trackId,file,name:safeName,size:file.size};
   displayTrack(safeName);
   soundURL=URL.createObjectURL(file);
@@ -88,7 +88,7 @@
   if(packet.t==='music-decline' && !ANDROID && outgoing?.id===packet.id){
    outgoing=null;clearTrack();fail(text('Phone declined the music transfer.','Telefon müzik aktarımını reddetti.'));return;
   }
-  if(packet.t==='music-ready' && !ANDROID && outgoing?.id===packet.id){
+  if(packet.t==='music-ready' && !ANDROID && trackId===packet.id){
    remoteReady=true;updateReady();return;
   }
   if(packet.t==='music-error' && outgoing?.id===packet.id){
