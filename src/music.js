@@ -25,7 +25,7 @@
   if(share)share.disabled=!wire()?.connected||!!outgoing;
   if(pick)pick.disabled=!wire()?.connected||!!outgoing;
   if(play)play.disabled=!ready||!wire()?.connected;
-  if(stop)stop.disabled=!trackId;
+  if(stop)stop.disabled=!ready||!wire()?.connected;
  }
  function resetSound(){
   clearTimeout(playTimer);playTimer=null;playing=false;
@@ -43,7 +43,7 @@
   return !!file && AUDIO_RE.test(file.name) && file.size>0 && file.size<=MAX_MUSIC;
  }
  function displayTrack(track){if(name)name.textContent=track;}
- if(pick&&fileInput)pick.addEventListener('click',()=>{if(wire()?.connected)fileInput.click();else fail(text('Connect your phone first.','Önce telefona bağlanın.'));});
+ if(pick&&fileInput)pick.addEventListener('click',()=>{if(wire()?.connected){fileInput.value='';fileInput.click();}else fail(text('Connect your phone first.','Önce telefona bağlanın.'));});
  if(fileInput)fileInput.addEventListener('change',()=>{
   if(share){share.disabled=!fileInput.files?.length||!wire()?.connected;if(!share.disabled)share.click();}
  });
