@@ -68,6 +68,7 @@ window.MusicPortHub={
  offer(f,id,n){file=f;trackId=id;trackName=n;const targets=[...peers.values()].filter(p=>p.session.verified);
   for(const p of targets)p.ready=false;render();for(const p of targets)void sendAudio(p,f,id,n);return targets.length;},
  async play(at,position=0){lastStarted=at;await Promise.allSettled([...peers.values()].filter(p=>p.ready).map(p=>p.session.send({t:'music-play',id:trackId,at,offset:p.offset||0,position})));},
+ async pause(position){lastStarted=null;await Promise.allSettled([...peers.values()].filter(p=>p.session.verified).map(p=>p.session.send({t:'music-pause',id:trackId,position})));},
  async stop(){lastStarted=null;await Promise.allSettled([...peers.values()].filter(p=>p.session.verified).map(p=>p.session.send({t:'music-stop',id:trackId})));}
 };
 $('musicPortAdd')?.addEventListener('click',()=>{$('musicPortHelp').hidden=!$('musicPortHelp').hidden;});

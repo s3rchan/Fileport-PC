@@ -212,7 +212,7 @@
   if(p.t==='ping'){await sendPacket({t:'pong'});return;}
   if(p.t==='pong')return;
   if(p.t==='text'){if(typeof p.text==='string'&&p.text.length<=2000)window.FileportFlow?.incomingText(p.text);return;}
-  if(['music-offer','music-accept','music-decline','music-ready','music-error','music-play','music-stop','music-clock-ping','music-clock-pong'].includes(p.t)){
+  if(['music-offer','music-accept','music-decline','music-ready','music-error','music-play','music-stop','music-pause','music-clock-ping','music-clock-pong'].includes(p.t)){
    await window.FileportMusic?.handlePacket?.(p);return;
   }
   if(p.t==='file-start'){

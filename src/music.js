@@ -10,7 +10,7 @@
  const hub=()=>!ANDROID?window.MusicPortHub:null;
  let clockOffset=0,clockSamples=Infinity;
  const pick=$('musicPick'),share=$('musicShare'),fileInput=$('musicFileInput');
- const play=$('musicPlay'),stop=$('musicStop'),name=$('musicTrackName');
+ const play=$('musicPlay'),pause=$('musicPause'),seek=$('musicSeek'),stop=$('musicStop'),name=$('musicTrackName');
  const status=$('musicStatus'),offer=$('musicOfferOverlay'),offerText=$('musicOfferText');
  const accept=$('musicOfferAccept'),decline=$('musicOfferDecline');
  const localAudio=$('musicAudio');
@@ -18,7 +18,7 @@
  const AUDIO_RE=/\.(mp3|m4a|wav|ogg|oga|flac)$/i;
  const freshId=()=>Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
  let outgoing=null,approval=null,trackId=null,ready=false,remoteReady=false,saved=false;
- let soundURL=null,playTimer=null,playing=false;
+ let soundURL=null,playTimer=null,playing=false,pausedAt=0;
  const tr=()=>window.FileportI18n?.language==='tr';
  const text=(en,localized)=>tr()?localized:en;
  function note(message){if(status)status.textContent=message;}
@@ -28,6 +28,7 @@
   if(pick)pick.disabled=!(wire()?.connected||hub()?.connected)||!!outgoing;
   if(play)play.disabled=!ready||!!hub()?.pending;
   if(stop)stop.disabled=!ready;
+  if(pause)pause.disabled=!ready||!playing;
  }
  function resetSound(){
   clearTimeout(playTimer);playTimer=null;playing=false;
@@ -35,7 +36,7 @@
   else if(localAudio){localAudio.pause();localAudio.currentTime=0;}
  }
  function clearTrack(){
-  resetSound();ready=false;remoteReady=false;saved=false;trackId=null;
+  resetSound();pausedAt=0;ready=false;remoteReady=false;saved=false;trackId=null;
   if(soundURL){URL.revokeObjectURL(soundURL);soundURL=null;}
   if(localAudio)localAudio.removeAttribute('src');
   update();
@@ -104,8 +105,13 @@
   }
   if(packet.t==='music-clock-ping'&&ANDROID){const received=Date.now();await wire().send({t:'music-clock-pong',sent:packet.sent,received,responded:Date.now()});return;}
   if(packet.t==='music-clock-pong'&&!ANDROID){const now=Date.now(),rtt=(now-packet.sent)-(packet.responded-packet.received);if(rtt>=0&&rtt<clockSamples){clockSamples=rtt;clockOffset=((packet.received-packet.sent)+(packet.responded-now))/2;}return;}
+  if(packet.t==='music-pause'&&ready&&packet.id===trackId){
+   clearTimeout(playTimer);playTimer=null;playing=false;pausedAt=Math.max(0,Number(packet.position)||0);
+   if(ANDROID)window.FileportNative.pauseMusic();else if(localAudio)localAudio.pause();
+   note(text('Paused.','Duraklatıldı.'));update();return;
+  }
   if(packet.t==='music-stop' && ready && packet.id===trackId){
-   resetSound();note(text('Playback stopped.','Oynatma durduruldu.'));update();
+   resetSound();pausedAt=0;note(text('Playback stopped.','Oynatma durduruldu.'));update();
   }
  }
  function updateReady(){
@@ -132,7 +138,9 @@
   resetSound();
   note(text('Starting together…','Birlikte başlatılıyor…'));
   if(ANDROID){
-   const result=window.FileportNative.scheduleMusic(trackId,Math.max(0,Math.round(delay)));
+   const result=typeof window.FileportNative.scheduleMusicAt==='function'
+    ?window.FileportNative.scheduleMusicAt(trackId,Math.max(0,Math.round(delay)),Math.max(0,Math.round(position)))
+    :window.FileportNative.scheduleMusic(trackId,Math.max(0,Math.round(delay)));
    if(!result)fail(text('Android music player is not ready.','Android müzik oynatıcı hazır değil.'));
   }else if(localAudio){
    playTimer=setTimeout(()=>{
@@ -146,13 +154,20 @@
  async function cue(kind){
   if(!ready)return;
   try{
-   if(kind==='music-stop'){if(wire()?.connected&&remoteReady)await wire().send({t:kind,id:trackId});await hub()?.stop();resetSound();note(text('Playback stopped.','Oynatma durduruldu.'));}
-   else{const at=Date.now()+4000;if(wire()?.connected&&remoteReady)await wire().send({t:kind,id:trackId,at,offset:clockOffset,position:0});await hub()?.play(at,0);await schedulePlay(Math.max(0,at-Date.now()));}
+   if(kind==='music-stop'){if(wire()?.connected&&remoteReady)await wire().send({t:kind,id:trackId});await hub()?.stop();resetSound();pausedAt=0;note(text('Playback stopped.','Oynatma durduruldu.'));}
+   else if(kind==='music-pause'){pausedAt=ANDROID?pausedAt:Math.floor((localAudio?.currentTime||0)*1000);
+    if(wire()?.connected&&remoteReady)await wire().send({t:kind,id:trackId,position:pausedAt});await hub()?.pause(pausedAt);
+    clearTimeout(playTimer);playTimer=null;playing=false;if(ANDROID)window.FileportNative.pauseMusic();else localAudio?.pause();note(text('Paused.','Duraklatıldı.'));update();}
+   else{const position=Math.max(0,pausedAt),at=Date.now()+4000;
+    if(wire()?.connected&&remoteReady)await wire().send({t:kind,id:trackId,at,offset:clockOffset,position});
+    await hub()?.play(at,position);await schedulePlay(Math.max(0,at-Date.now()),position);}
   }
   catch(error){fail(String(error.message||error));}
  }
  if(play)play.addEventListener('click',()=>void cue('music-play'));
  if(stop)stop.addEventListener('click',()=>void cue('music-stop'));
+ if(pause)pause.addEventListener('click',()=>void cue('music-pause'));
+ if(seek)seek.addEventListener('change',()=>{if(!ready||ANDROID)return;const duration=Number(localAudio?.duration);if(Number.isFinite(duration)&&duration>0){pausedAt=Math.round(duration*Number(seek.value)*10);void cue('music-play');}});
  if(accept)accept.addEventListener('click',async()=>{
   if(!approval||approval.accepted)return;
   approval.accepted=true;closeOffer();note(text('Approved. Waiting for the file…','Onaylandı. Dosya bekleniyor…'));
@@ -169,6 +184,7 @@
   note(text('Connect your devices to share music.','Müzik paylaşmak için cihazları bağlayın.'));
  }
  window.FileportMusic={handlePacket,allowIncoming,fileReceived,fileSent,disconnected,groupChanged:()=>{updateReady();update();}};
+ if(localAudio&&seek&&typeof setInterval==='function')setInterval(()=>{const duration=Number(localAudio.duration);if(Number.isFinite(duration)&&duration>0&&playing)seek.value=String(Math.floor(localAudio.currentTime/duration*100));},1000);
  if(!ANDROID&&typeof setInterval==='function')setInterval(()=>{if(wire()?.connected&&remoteReady)void wire().send({t:'music-clock-ping',sent:Date.now()}).catch(()=>{});},4500);
  window.addEventListener('fileport-peer-connected',update);
  window.addEventListener('fileport-peer-disconnected',disconnected);

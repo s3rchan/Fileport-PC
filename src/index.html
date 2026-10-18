@@ -92,9 +92,10 @@
   <h3 id="musicTrackName">No music selected</h3>
   <p id="musicStatus" role="status" aria-live="polite">Connect your devices to share music.</p>
   <div class="music-controls">
-   <button class="button button-primary" id="musicPlay" disabled type="button">▶ Play on both</button>
+   <button class="button button-primary" id="musicPlay" disabled type="button">▶ Play / Resume</button><button class="button button-outline" id="musicPause" disabled type="button">Ⅱ Pause</button>
    <button class="button button-outline" id="musicStop" disabled type="button">■ Stop</button>
   </div>
+  <label for="musicSeek">Playback position</label><input type="range" id="musicSeek" min="0" max="100" value="0" style="width:100%" aria-label="Seek playback"/>
   <audio id="musicAudio" preload="auto" hidden></audio>
  </div>
  <p class="music-footnote">Supports MP3, M4A, WAV, OGG and FLAC files up to 150 MB. Playback starts approximately together on your local Wi-Fi.</p>
