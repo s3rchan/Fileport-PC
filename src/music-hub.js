@@ -1,7 +1,7 @@
 /* Up to eight separate MusicPort/1 music receivers; FPTP file peer remains isolated. */
 (()=>{'use strict';
 const $=id=>document.getElementById(id),invoke=window.__TAURI__?.core?.invoke,peers=new Map();
-let file=null,trackId=null,trackName='',lastStarted=null;
+let file=null,trackId=null,trackName='',lastStarted=null,lastPosition=0;
 const CHUNK=32*1024,CREDIT=256*1024;
 const b64=a=>{let s='';for(let i=0;i<a.length;i+=8192)s+=String.fromCharCode(...a.subarray(i,i+8192));return btoa(s);};
 function wait(p,kind,id,ms=45000){if(p.waiter)throw Error('Another request is pending');
@@ -56,7 +56,7 @@ async function sendAudio(p,f,id,n){
   }
   const receipt=wait(p,'music-ready',id,70000);
   await p.session.send({t:'music-end',id,sha256:hash.digest()});await receipt;
-  if(trackId===id){p.ready=true;render();status(`${p.session.peer.name} ready.`);}
+  if(trackId===id){p.ready=true;render();status(`${p.session.peer.name} ready.`);if(lastStarted!==null){const at=Date.now()+4000,position=Math.max(0,lastPosition+at-lastStarted);await p.session.send({t:'music-play',id,at,offset:p.offset||0,position}).catch(e=>status(String(e)));}}
  }catch(e){p.ready=false;p.error=String(e.message||e);status(`${p.session?.peer?.name||'Receiver'}: ${p.error}`);render();}
 }
 setInterval(()=>{for(const p of peers.values())if(p.session.verified)void p.session.send({t:'clock-ping',sent:Date.now()}).catch(()=>{});},4500);
@@ -67,9 +67,9 @@ window.MusicPortHub={
  get count(){return [...peers.values()].filter(p=>p.session.verified).length;},
  offer(f,id,n){file=f;trackId=id;trackName=n;const targets=[...peers.values()].filter(p=>p.session.verified);
   for(const p of targets)p.ready=false;render();for(const p of targets)void sendAudio(p,f,id,n);return targets.length;},
- async play(at,position=0){lastStarted=at;await Promise.allSettled([...peers.values()].filter(p=>p.ready).map(p=>p.session.send({t:'music-play',id:trackId,at,offset:p.offset||0,position})));},
- async pause(position){lastStarted=null;await Promise.allSettled([...peers.values()].filter(p=>p.session.verified).map(p=>p.session.send({t:'music-pause',id:trackId,position})));},
- async stop(){lastStarted=null;await Promise.allSettled([...peers.values()].filter(p=>p.session.verified).map(p=>p.session.send({t:'music-stop',id:trackId})));}
+ async play(at,position=0){lastStarted=at;lastPosition=position;await Promise.allSettled([...peers.values()].filter(p=>p.ready).map(p=>p.session.send({t:'music-play',id:trackId,at,offset:p.offset||0,position})));},
+ async pause(position){lastStarted=null;lastPosition=position;await Promise.allSettled([...peers.values()].filter(p=>p.session.verified).map(p=>p.session.send({t:'music-pause',id:trackId,position})));},
+ async stop(){lastStarted=null;lastPosition=0;await Promise.allSettled([...peers.values()].filter(p=>p.session.verified).map(p=>p.session.send({t:'music-stop',id:trackId})));}
 };
 $('musicPortAdd')?.addEventListener('click',()=>{$('musicPortHelp').hidden=!$('musicPortHelp').hidden;});
 void invoke?.('musicport_local_ip').then(ip=>{if($('musicPortIp'))$('musicPortIp').textContent=ip;}).catch(()=>{});
