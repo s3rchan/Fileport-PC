@@ -1,3 +1,11 @@
+## 1.9.4 — MusicPort sync (candidate)
+- Added separate multi-receiver MusicPort TCP service (38480) and LAN discovery (38481).
+- Added Devices → Add New Music Device and MusicPort receiver management.
+- Group music playback can include existing Fileport Android; each receiver grants per-track consent.
+- Scheduled playback with clock offset estimates; final physical-device synchronization testing remains required.
+- Prevent skipped files in multi-file queues and limit repeated failures.
+- Preserve original two-peer FPTP/1 file transport.
+
 # Fileport PC — Changelog
 
 The historical version-specific README files were consolidated here on 18 October 2026. These entries describe past source milestones, not a guarantee that each historical binary was publicly released.

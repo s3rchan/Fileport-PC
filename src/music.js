@@ -7,6 +7,8 @@
  const $=id=>document.getElementById(id);
  const ANDROID=!!window.FileportNative;
  const wire=()=>window.FileportMusicTransport;
+ const hub=()=>!ANDROID?window.MusicPortHub:null;
+ let clockOffset=0,clockSamples=Infinity;
  const pick=$('musicPick'),share=$('musicShare'),fileInput=$('musicFileInput');
  const play=$('musicPlay'),stop=$('musicStop'),name=$('musicTrackName');
  const status=$('musicStatus'),offer=$('musicOfferOverlay'),offerText=$('musicOfferText');
@@ -22,10 +24,10 @@
  function note(message){if(status)status.textContent=message;}
  function closeOffer(){if(offer)offer.classList.add('hidden');}
  function update(){
-  if(share)share.disabled=!wire()?.connected||!!outgoing;
-  if(pick)pick.disabled=!wire()?.connected||!!outgoing;
-  if(play)play.disabled=!ready||!wire()?.connected;
-  if(stop)stop.disabled=!ready||!wire()?.connected;
+  if(share)share.disabled=!(wire()?.connected||hub()?.connected)||!!outgoing;
+  if(pick)pick.disabled=!(wire()?.connected||hub()?.connected)||!!outgoing;
+  if(play)play.disabled=!ready||!!hub()?.pending;
+  if(stop)stop.disabled=!ready;
  }
  function resetSound(){
   clearTimeout(playTimer);playTimer=null;playing=false;
@@ -43,25 +45,28 @@
   return !!file && AUDIO_RE.test(file.name) && file.size>0 && file.size<=MAX_MUSIC;
  }
  function displayTrack(track){if(name)name.textContent=track;}
- if(pick&&fileInput)pick.addEventListener('click',()=>{if(wire()?.connected){fileInput.value='';fileInput.click();}else fail(text('Connect your phone first.','Önce telefona bağlanın.'));});
+ if(pick&&fileInput)pick.addEventListener('click',()=>{if(wire()?.connected||hub()?.connected){fileInput.value='';fileInput.click();}else fail(text('Connect your phone first.','Önce telefona bağlanın.'));});
  if(fileInput)fileInput.addEventListener('change',()=>{
-  if(share){share.disabled=!fileInput.files?.length||!wire()?.connected;if(!share.disabled)share.click();}
+  if(share){share.disabled=!fileInput.files?.length||!(wire()?.connected||hub()?.connected);if(!share.disabled)share.click();}
  });
  if(share)share.addEventListener('click',async()=>{
   const file=fileInput?.files?.[0];
-  if(!wire()?.connected){fail(text('Connect your phone first.','Önce telefona bağlanın.'));return;}
+  if(!(wire()?.connected||hub()?.connected)){fail(text('Connect your phone first.','Önce telefona bağlanın.'));return;}
   if(outgoing){fail(text('Wait for the previous music offer.','Önceki müzik isteğini bekleyin.'));return;}
   if(!allowedFile(file)){fail(text('Choose an MP3, M4A, WAV, OGG or FLAC file up to 150 MB.','En fazla 150 MB MP3, M4A, WAV, OGG veya FLAC seçin.'));return;}
   clearTrack();trackId=freshId();
   const safeName=file.name.replace(/[\u0000-\u001f\u007f<>:"/\\|?*]/g,'_').replace(/^[. ]+|[. ]+$/g,'').slice(0,150);
-  outgoing={id:trackId,file,name:safeName,size:file.size};
+  outgoing=wire()?.connected?{id:trackId,file,name:safeName,size:file.size}:null;
+  saved=!ANDROID;
+  if(hub()?.connected)void hub().offer(file,trackId,safeName);
   displayTrack(safeName);
   soundURL=URL.createObjectURL(file);
   if(localAudio){localAudio.src=soundURL;localAudio.load();}
   note(text('Waiting for your phone to approve this song…','Şarkının telefonda onaylanması bekleniyor…'));
   update();
   try{
-   await wire().send({t:'music-offer',id:trackId,name:safeName,size:file.size,mime:file.type||'audio/mpeg'});
+   if(outgoing)await wire().send({t:'music-offer',id:trackId,name:safeName,size:file.size,mime:file.type||'audio/mpeg'});
+   updateReady();
   }catch(error){outgoing=null;fail(String(error.message||error));}
  });
  async function handlePacket(packet){
@@ -91,18 +96,21 @@
   if(packet.t==='music-ready' && !ANDROID && trackId===packet.id){
    remoteReady=true;updateReady();return;
   }
-  if(packet.t==='music-error' && outgoing?.id===packet.id){
-   outgoing=null;clearTrack();fail(text('Phone cannot play this audio format.','Telefon bu ses formatını çalamıyor.'));return;
+  if(packet.t==='music-error' && !ANDROID && trackId===packet.id){
+   outgoing=null;remoteReady=false;updateReady();fail(text('Phone cannot play this audio format.','Telefon bu ses formatını çalamıyor.'));return;
   }
   if(packet.t==='music-play' && ready && packet.id===trackId){
-   schedulePlay(1600);return;
+   schedulePlay(Number.isFinite(packet.at)?Math.max(0,packet.at+(Number(packet.offset)||0)-Date.now()):1600,packet.position||0);return;
   }
+  if(packet.t==='music-clock-ping'&&ANDROID){const received=Date.now();await wire().send({t:'music-clock-pong',sent:packet.sent,received,responded:Date.now()});return;}
+  if(packet.t==='music-clock-pong'&&!ANDROID){const now=Date.now(),rtt=(now-packet.sent)-(packet.responded-packet.received);if(rtt>=0&&rtt<clockSamples){clockSamples=rtt;clockOffset=((packet.received-packet.sent)+(packet.responded-now))/2;}return;}
   if(packet.t==='music-stop' && ready && packet.id===trackId){
    resetSound();note(text('Playback stopped.','Oynatma durduruldu.'));update();
   }
  }
  function updateReady(){
-  ready=!!trackId && (ANDROID?saved:(saved&&remoteReady));
+  ready=!!trackId && (ANDROID?saved:(saved&&(remoteReady||!!hub()?.ready)));
+  if(ready&&hub()?.pending)note('Waiting for MusicPort receivers to load the track...');
   if(ready)note(text('Music is ready on both devices. Press Play.','Müzik iki cihazda hazır. Play tuşuna basın.'));
   update();
  }
@@ -119,16 +127,16 @@
  function allowIncoming(p){
   return ANDROID&&!!approval?.accepted&&p?.music===true&&approval.id===p.id&&approval.name===p.name&&approval.size===p.size;
  }
- async function schedulePlay(delay){
+ async function schedulePlay(delay,position=0){
   if(!ready)return;
   resetSound();
   note(text('Starting together…','Birlikte başlatılıyor…'));
   if(ANDROID){
-   const result=window.FileportNative.scheduleMusic(trackId,delay);
+   const result=window.FileportNative.scheduleMusic(trackId,Math.max(0,Math.round(delay)));
    if(!result)fail(text('Android music player is not ready.','Android müzik oynatıcı hazır değil.'));
   }else if(localAudio){
    playTimer=setTimeout(()=>{
-    localAudio.currentTime=0;
+    localAudio.currentTime=Math.max(0,Number(position)||0)/1000;
     const result=localAudio.play();
     if(result?.catch)result.catch(error=>fail(text('Playback blocked: ','Oynatma engellendi: ')+error.message));
    },delay);
@@ -136,8 +144,11 @@
   playing=true;update();
  }
  async function cue(kind){
-  if(!ready||!wire()?.connected)return;
-  try{await wire().send({t:kind,id:trackId});if(kind==='music-stop'){resetSound();note(text('Playback stopped.','Oynatma durduruldu.'));}else await schedulePlay(1600);}
+  if(!ready)return;
+  try{
+   if(kind==='music-stop'){if(wire()?.connected&&remoteReady)await wire().send({t:kind,id:trackId});await hub()?.stop();resetSound();note(text('Playback stopped.','Oynatma durduruldu.'));}
+   else{const at=Date.now()+4000;if(wire()?.connected&&remoteReady)await wire().send({t:kind,id:trackId,at,offset:clockOffset,position:0});await hub()?.play(at,0);await schedulePlay(Math.max(0,at-Date.now()));}
+  }
   catch(error){fail(String(error.message||error));}
  }
  if(play)play.addEventListener('click',()=>void cue('music-play'));
@@ -153,10 +164,12 @@
   if(id)await wire()?.send({t:'music-decline',id}).catch(()=>{});
  });
  function disconnected(){
-  closeOffer();approval=null;outgoing=null;clearTrack();
+  closeOffer();approval=null;outgoing=null;
+  if(!hub()?.connected)clearTrack();else{remoteReady=false;updateReady();}
   note(text('Connect your devices to share music.','Müzik paylaşmak için cihazları bağlayın.'));
  }
- window.FileportMusic={handlePacket,allowIncoming,fileReceived,fileSent,disconnected};
+ window.FileportMusic={handlePacket,allowIncoming,fileReceived,fileSent,disconnected,groupChanged:()=>{updateReady();update();}};
+ if(!ANDROID&&typeof setInterval==='function')setInterval(()=>{if(wire()?.connected&&remoteReady)void wire().send({t:'music-clock-ping',sent:Date.now()}).catch(()=>{});},4500);
  window.addEventListener('fileport-peer-connected',update);
  window.addEventListener('fileport-peer-disconnected',disconnected);
  note(text('Connect your devices to share music.','Müzik paylaşmak için cihazları bağlayın.'));
