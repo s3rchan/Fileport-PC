@@ -79,8 +79,8 @@
   }
   if(packet.t==='music-accept' && !ANDROID && outgoing?.id===packet.id){
    note(text('Approved. Sending music to your phone…','Onaylandı. Müzik telefona gönderiliyor…'));
-   try{await wire().sendMusic(outgoing.file,outgoing.id);}
-   catch(error){outgoing=null;fail(text('Music transfer failed: ','Müzik aktarımı başarısız: ')+String(error.message||error));}
+   void wire().sendMusic(outgoing.file,outgoing.id)
+    .catch(error=>{outgoing=null;fail(text('Music transfer failed: ','Müzik aktarımı başarısız: ')+String(error.message||error));});
    return;
   }
   if(packet.t==='music-decline' && !ANDROID && outgoing?.id===packet.id){
