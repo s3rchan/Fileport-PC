@@ -31,6 +31,8 @@
  let sendWait=null,ackWait=null,receiptWait=null,retryTimer=null,heartbeat=null,closing=false;
  let filesPending=[];
  let retries=0;
+ // Migration cleanup: remove saved trust records for the retired receiver subsystem.
+ try{localStorage.removeItem('musicport-trusted-v1');}catch{}
  const recentIdsKey='fileport-fptp-resume-v1';
  function setTransferActive(value){window.FileportTransferActive=!!value;if(ANDROID)window.FileportNative.setTransferActive(!!value);}
  const hex=identity.hex;
