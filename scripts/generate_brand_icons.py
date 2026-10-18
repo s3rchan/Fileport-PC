@@ -1,21 +1,29 @@
-"""Generate Fileport Windows icons from Newdesign/logo.png, preserving its artwork.
-The image is sourced from the approved Newdesign.zip and stored in the repository.
+"""Build every Windows icon from the new Fileport logo.
+The original PNG is kept in src/branding/logo.png. No legacy icon assets are
+needed in Git: running `npm run dev` or `npm run build` recreates the icons.
+
+Taskbar fix: remove alpha padding and scale the image to *fill* the icon square,
+including small 16/24/32 px Windows icon sizes. The artwork is unchanged.
 """
 from pathlib import Path
 from PIL import Image
 
-ROOT = Path(__file__).resolve().parents[1]
-ASSETS = ROOT / "src" / "branding"
-source = ASSETS / "logo.png"
-if not source.is_file():
-    raise FileNotFoundError("Missing approved brand icon src/branding/logo.png")
-art = Image.open(source).convert("RGBA")
-art.thumbnail((500, 500), Image.Resampling.LANCZOS)
-image = Image.new("RGBA", (512, 512), (0, 0, 0, 0))
-image.alpha_composite(art, ((512-art.width)//2, (512-art.height)//2))
-icons = ROOT / "src-tauri" / "icons"
-icons.mkdir(parents=True, exist_ok=True)
-image.save(icons / "icon.png", optimize=True)
-image.save(icons / "icon.ico", format="ICO",
-           sizes=[(16,16),(32,32),(48,48),(64,64),(128,128),(256,256)])
-print("Fileport Windows icon generated from approved Newdesign/logo.png")
+ROOT=Path(__file__).resolve().parents[1]
+SOURCE=ROOT/"src/branding/logo.png"
+if not SOURCE.is_file():
+    raise FileNotFoundError(f"Missing official Fileport logo: {SOURCE}")
+art=Image.open(SOURCE).convert("RGBA")
+mask=art.getchannel("A").point(lambda a: 255 if a > 32 else 0)
+bbox=mask.getbbox()
+if bbox is None:
+    raise RuntimeError("Official Fileport icon contains no visible pixels")
+art=art.crop(bbox)
+# The official vertical mark is slightly narrower than a square. Filling the
+# icon gives it a visibly larger footprint in the Windows taskbar and Start.
+icon=art.resize((512,512),Image.Resampling.LANCZOS)
+output=ROOT/"src-tauri/icons"
+output.mkdir(parents=True,exist_ok=True)
+icon.save(output/"icon.png",optimize=True)
+icon.save(output/"icon.ico",format="ICO",
+          sizes=[(16,16),(24,24),(32,32),(48,48),(64,64),(128,128),(256,256)])
+print("Created full-size Windows and taskbar icons from Newdesign/logo.png")

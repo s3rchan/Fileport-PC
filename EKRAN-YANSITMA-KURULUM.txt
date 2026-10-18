@@ -1,6 +1,0 @@
-YAKIN Android ekran yansıtma sunucusu
-
-GitHub'daki mevcut Render sunucu kodunu BU web projesiyle güncelleyin. Özellikle server.js, public/screen-viewer.js ve public/screen.html. Sunucuyu redeploy edin.
-PC'de https://file-share-4g5b.onrender.com/screen.html üzerinden bir izleme odası açın.
-Android uygulamasında Ekran yansıtmayı başlat > kod > Android ekran yakalama izni.
-Görüntü JPEG olarak WebSocket üzerinden iletilir. WebRTC değil, düşük kare hızlı prototiptir, ses yok.

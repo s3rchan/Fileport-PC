@@ -36,8 +36,8 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
-      - name: Install JavaScript dependencies
-        run: npm install
+      - name: Install JavaScript dependencies (legacy lockfile removed)
+        run: npm install --no-package-lock
       - name: Set up Python for brand asset generation
         uses: actions/setup-python@v5
         with:
@@ -48,6 +48,8 @@ jobs:
           python -m pip install Pillow==11.3.0
           python scripts/generate_brand_icons.py
           python scripts/install_brand_fonts.py
+      - name: Verify release version consistency
+        run: python scripts/bump_version.py --check
       - name: Run protocol tests
         run: npm test
       - name: Build NSIS installer

@@ -1,101 +1,74 @@
-# Fileport — Windows PC
+# Fileport PC
 
-**Fileport** is a desktop application for direct file transfers and messaging between a Windows PC and an Android phone over the same Wi-Fi or local area network (LAN).
+**Fileport** connects your Windows PC directly to your Android phone for local file sharing and chat. It uses the same reachable Wi-Fi / LAN, not a cloud server.
 
-**Current Windows version:** v1.8.0 · **Android app:** [Fileport Android repository](https://github.com/s3rchan/Fileport-Android)
+**Source version:** v1.9.1 (development build; a source build is not automatically a published Release).
 
-[**Download the Windows installer — GitHub Releases**](https://github.com/s3rchan/Fileport-PC/releases/latest)
-
-> **Note:** This repository is no longer the original room-code-based "Yakın" WebRTC project. Fileport is a standalone Windows application for local networks and does not require numbered rooms, a web signaling server, or TURN.
+**Android companion:** [Fileport Android](https://github.com/s3rchan/Fileport-Android)  
+**Windows downloads:** [Official GitHub Releases](https://github.com/s3rchan/Fileport-PC/releases)  
+**Build artifacts:** [GitHub Actions](https://github.com/s3rchan/Fileport-PC/actions)
 
 ## Features
 
-- **PC-initiated pairing:** Windows discovers Fileport Android devices on the same local network and sends connection requests.
-- **Phone approval:** Android accepts or rejects incoming requests. Automatic reconnection may be enabled for trusted computers.
-- **Six-digit verification:** During first-time pairing, compare and approve the six-digit security code on both devices.
-- **Direct file transfers and chat:** Communicate over a local FPTP/1 connection.
-- **Local device and transfer history:** History stays on the device; transferred files are not stored in chat history.
-- **Reconnection:** The PC can send a new connection request to a previously trusted device.
-- **Update options:** Check GitHub Releases for updates or choose an installer manually using the offline update option.
-- **English and Turkish interface.**
+- PC-initiated LAN discovery and signed connection requests.
+- Six-digit verification on both devices during first-time pairing, with saved trusted device records.
+- Direct encrypted FPTP/1 file transfers, text chat, and resumable partial downloads.
+- Device and connection history stored locally.
+- Built-in online update checks through the official GitHub Releases repository.
+- English and Turkish language settings, About screen, and official Fileport branding.
 
-## Requirements
+## Installation and pairing
 
-- Windows 10 or 11 (x64).
-- The Fileport Android app installed on your phone.
-- Both devices connected to the same reachable Wi-Fi/LAN.
-- Windows Firewall configured to allow Fileport's local network communication.
+1. Install the Windows NSIS installer from the **Releases** page. Unsigned builds can show a Windows SmartScreen warning.
+2. Open Fileport on both devices using the same reachable private Wi-Fi / LAN.
+3. On the PC choose **Start** or **Connect**, then select the phone.
+4. Approve the signed request on the phone. For first pairing, **verify the matching six-digit code on both devices**.
+5. Share messages and files. PC initiates reconnection; Android can remember explicit auto-connect approval for a trusted PC.
 
-Local transfers do **not** require internet access. Checking GitHub for updates and downloading them **does** require internet access.
+**Network ports:** PC TCP `38477`, PC discovery UDP `38478`, Android request UDP `38479`. Firewall or router client isolation can prevent discovery/connection. Local transfers need no internet. Only update checks/downloads need internet.
 
-## Installation and first connection
+## Build from source
 
-1. Open [GitHub Releases](https://github.com/s3rchan/Fileport-PC/releases).
-2. Download the latest `Fileport_*_x64-setup.exe` installer.
-3. Install and launch Fileport on Windows.
-4. Open Fileport on your Android phone.
-5. On the PC, select the phone through the **Start / Connect** flow.
-6. Approve the incoming request on the phone. During initial pairing, compare the six-digit code on both devices and confirm.
-7. Once connected, use chat and file sharing.
+Requires Windows 10/11 (x64), Node.js 22, Rust/MSVC + WebView2 and Python 3 with Pillow.
 
-> **Windows SmartScreen:** Publishing an installer on GitHub Releases does not automatically establish a trusted publisher reputation or replace Authenticode signing. Download installers only from the official Releases page.
-
-## GitHub Releases and updates
-
-Windows releases use tags in the format `pc-vX.Y.Z` (for example, `pc-v1.8.0`).
-
-- [Windows releases](https://github.com/s3rchan/Fileport-PC/releases)
-- [Windows GitHub Actions](https://github.com/s3rchan/Fileport-PC/actions)
-- [Android releases](https://github.com/s3rchan/Fileport-Android/releases)
-
-In Fileport PC, open **Settings → GitHub updates (Windows)** to check for a newer version and download its installer. The **Offline update** option is also available.
-
-**Repository rename compatibility:** The v1.8.0 updater source still references the former repository path `s3rchan/Fileport-PC-v1.6`. It may continue to work through GitHub's redirects, but the next Windows release should update the URLs to `s3rchan/Fileport-PC` and test the complete flow on a real Windows machine. Update behavior in the current build is not guaranteed.
-
-### Automated Windows builds
-
-Open **Actions → Build Fileport Windows EXE → Run workflow**.
-
-- A regular push to `main` runs CI tests, builds the NSIS installer, and makes it available under **Artifacts → Fileport-Windows-Installer**.
-- A manual run with **Publish installer to GitHub Releases** selected also publishes the resulting installer to the `pc-vX.Y.Z` release matching the app version.
-- Pushing a `pc-v*` tag triggers a version check and publication to the associated Release.
-
-**A successful GitHub Actions build does not guarantee compatibility** with every device or network. Windows–Android pairing and transfers should also be tested on physical devices.
-
-## Development
-
-Fileport uses **Tauri 2 / Rust** for the native Windows application and **HTML, CSS, and JavaScript** for the interface.
-
-Local development requires Node.js, Rust, and the necessary Windows build tools.
-
-```bash
-npm install
+```powershell
+python -m pip install Pillow==11.3.0
+python scripts/install_brand_fonts.py
+npm install --no-package-lock
 npm test
 npm run build -- --bundles nsis
 ```
 
-Protocol, LAN connection, and updater tests are in `tests/`. See [FPTP_PROTOCOL_v1.md](FPTP_PROTOCOL_v1.md) for protocol details.
+The build and dev npm scripts first generate the Windows icon from `src/branding/logo.png`. This eliminates checked-in old binary icons and gives the taskbar/Start a full-size multi-resolution icon. On Windows, an older pinned shortcut may still have a cached icon: unpin and re-pin after installing the new EXE.
 
-## Security and privacy
+`npm run dev` runs the same icon generation before opening Tauri.
 
-Fileport is designed for direct communication over a local network. FPTP/1 is an experimental encrypted application protocol that **has not undergone an independent third-party security audit**. Always compare the pairing codes and approve requests only from devices you recognize.
+### Version policy (starting with v1.9.1)
 
-## Fileport brand identity
+- **Regular new version:** increase the last number, e.g. `1.9.1 → 1.9.2`.
+- **Major update in our release workflow:** increase the middle number, resetting the last one to zero, e.g. `1.9.2 → 1.10.0`.
+- The first number is reserved for a future platform-generation change.
+- Do not publish another source revision under the same release tag.
+- **Re-running an unchanged CI commit is not a new product version.**
 
-The approved visual identity for upcoming releases:
+Run `python scripts/bump_version.py patch` or `python scripts/bump_version.py minor` **before committing a new product build**. The script synchronizes `package.json`, Tauri and Rust versions, the About screen and README. CI checks consistency with `--check`. Write the corresponding `CHANGELOG.md` entry before publication.
 
-| Element | Standard |
-| --- | --- |
-| Primary blue | `#0637E7` |
-| Light blue | `#368CFF` |
-| Navy | `#01224F` |
-| Light background | `#CFE1F4` |
-| White | `#FFFFFF` |
-| Font | **Open Sauce** |
-| Logo | **White anchor symbol and Fileport wordmark on blue** |
+The previous root `package-lock.json` was for a different WebRTC/`ws` project and was intentionally deleted; CI resolves the current Tauri dependencies using `npm install --no-package-lock`. A correct Tauri lockfile can be committed once generated and tested.
 
-> The new brand identity will be introduced gradually in future versions. Its documentation here does not mean the current v1.8.0 EXE already uses the new logo, colors, or typography.
+## Release publishing
 
----
+Normal pushes to `main` build the Windows EXE and upload **Fileport-Windows-Installer** to Actions artifacts. Artifacts are test builds, not published application updates.
 
-**Fileport — direct connection, file sharing, and chat between Windows and Android.**
+Tag a tested commit as `pc-v1.9.1` (matching the Tauri version), or manually dispatch the workflow with the release option, to publish to GitHub Releases. The online updater points only at `s3rchan/Fileport-PC`.
+
+## Compatibility and migration
+
+The native identifier `com.yakin.flow.pc` and IndexedDB/localStorage keys beginning with `yakin-flow-` are **intentionally retained for upgrade compatibility**. Renaming them without a tested migration can orphan the ECDSA private identity and saved trusted-device list, and can break in-place Windows updates. They are not used in the visible Fileport branding or network protocol.
+
+Old WebRTC website/server sources, obsolete deployment/reflect-screen instructions, duplicate root workflow and unused logos are removed. See [CHANGELOG.md](CHANGELOG.md) for historical release notes and [FPTP_PROTOCOL_v1.md](FPTP_PROTOCOL_v1.md) for the protocol.
+
+## Privacy and security
+
+FPTP/1 is a custom encrypted application protocol, **not an independently audited security implementation**. Verify first-time pairing codes and approve only trusted devices. Current Windows installers are unsigned unless an Authenticode signing certificate is provided. Real PC/Android transfer and update tests remain essential before public Release distribution.
+
+© 2026 Fileport.

@@ -6,6 +6,7 @@
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <meta content="#01224F" name="theme-color"/>
 <title>Fileport — Local File Transfer</title>
+<link rel="icon" type="image/png" href="branding/logo.png"/>
 <link href="styles.css" rel="stylesheet"/>
 <script defer="" src="i18n.js"></script><script defer="" src="pairing.js"></script><script defer="" src="sha256-stream.js"></script><script defer="" src="app.js"></script><script defer="" src="flow.js"></script><script defer="" src="desktop.js"></script>
 <style>
@@ -55,7 +56,7 @@
 <div class="flow-setup-actions"><button class="button button-outline" id="desktopCancel" type="button">Back</button><button class="button button-primary" id="desktopRetryWaiting" type="button">Refresh</button></div>
 </div>
 </section><section class="trusted-devices" id="trustedDevices"><h3>Paired devices</h3><p>Manage trusted devices here. Removing the last one returns to setup.</p><div id="trustedDeviceList"></div><button class="button button-outline" id="desktopAddDevice" type="button">Add new device</button></section><section aria-label="Fileport sohbet ve aktarım" class="flow-panel" id="flowPanel">
-<div class="flow-header"><div class="flow-avatar"><img alt="" src="fileport-brand-icon.svg"/></div><div><span class="step">FILEPORT</span><h2>Connection &amp; chat</h2><p id="flowDeviceStatus">Chat starts when your devices connect.</p></div><span class="flow-live" id="flowLive">● Offline</span></div>
+<div class="flow-header"><div class="flow-avatar"><img alt="" src="branding/logo.png"/></div><div><span class="step">FILEPORT</span><h2>Connection &amp; chat</h2><p id="flowDeviceStatus">Chat starts when your devices connect.</p></div><span class="flow-live" id="flowLive">● Offline</span></div>
 <div aria-labelledby="pcReconnectTitle" aria-modal="false" class="flow-reconnect hidden" id="flowReconnect" role="dialog">
 <div class="flow-reconnect-card"><img class="reconnect-logo" src="branding/logo5.png" alt="Fileport"/><h3 id="pcReconnectTitle">Connect to device</h3>
 <p id="pcReconnectText">Open Fileport on your phone to connect.</p>
@@ -71,7 +72,7 @@
 <section class="desktop-settings" hidden="" id="desktopSettings"><h2 class="settings-heading">Settings</h2><div class="settings-card"><div class="settings-card-symbol" aria-hidden="true">◎</div><div class="settings-card-content"><h3>Language</h3><p>Choose your preferred language for the application.</p><div class="settings-language"><label for="languageSelect">Language</label><select id="languageSelect" aria-label="Language"><option value="en">English</option><option value="tr">Türkçe</option></select></div></div></div><div class="settings-card"><div class="settings-card-symbol" aria-hidden="true">↻</div><div class="settings-card-content"><div class="manual-update"><h3>GitHub updates (Windows)</h3><p>Check the official Fileport GitHub Releases repository for a newer PC version. Only update checks and downloads need internet; local transfers remain offline.</p><div class="update-actions"><button type="button" id="checkGithubUpdate">Check for updates</button><button type="button" id="installGithubUpdate" hidden disabled>Download and install</button></div><div id="githubUpdateDetails" class="github-update-details" hidden></div><progress id="githubUpdateProgress" class="github-update-progress" max="100" value="0" hidden></progress><p id="githubUpdateStatus" role="status" aria-live="polite"></p></div></div></div><div class="settings-card"><div class="settings-card-symbol" aria-hidden="true">▣</div><div class="settings-card-content"><div class="flow-pair desktop-device-block"><label for="flowDeviceName">This device</label><input id="flowDeviceName" maxlength="32" placeholder="e.g. Galaxy / Desktop"/><button class="button button-outline" id="flowSaveDevice" type="button">Save device name</button></div></div></div><p class="settings-footnote">Fileport uses encrypted FPTP/1 communication over your local network.</p></section><section class="desktop-about" id="desktopAbout" aria-label="About Fileport" hidden>
  <div class="about-identity"><img src="branding/logo5.png" alt="Fileport"/><h2>About Fileport</h2><p>Your Files. Your Devices. Your Freedom.</p></div>
  <div class="about-information"><div class="about-row"><span>Application</span><strong>Fileport</strong></div>
- <div class="about-row"><span>Version</span><strong>1.9.0</strong></div>
+ <div class="about-row"><span>Version</span><strong>1.9.1</strong></div>
  <div class="about-row"><span>Platform</span><strong>Windows · Tauri / Rust</strong></div>
  <div class="about-row"><span>Network</span><strong>Local Wi-Fi / LAN</strong></div></div>
  <h3>Direct file sharing and chat</h3>
