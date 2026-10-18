@@ -39,7 +39,7 @@
   }
  }
  function render(){
-  const first=(!trusted().length||addingDevice)&&!['devices','music'].includes(frame.dataset.view);
+  const first=(!trusted().length||addingDevice)&&frame.dataset.view!=='devices';
   setup.classList.toggle('hidden',!first);
   reconnect.classList.toggle('hidden',first||online);
   welcome.classList.toggle('hidden',started);
@@ -108,7 +108,6 @@
  window.addEventListener('fileport-connection-error',()=>{if(!online)render();});
  window.addEventListener('fileport-trusted-updated',render);
  $('desktopStart').addEventListener('click',()=>void begin());
- $('desktopMusicOnly')?.addEventListener('click',()=>{started=false;addingDevice=false;choose('devices');$('musicPortHelp').hidden=false;});
  $('desktopRetryWaiting').addEventListener('click',()=>{showDevices();void window.FileportConnection.host();});
  $('desktopCancel').addEventListener('click',()=>{cancelRequest();started=false;addingDevice=false;render();});
  $('desktopAddDevice').addEventListener('click',()=>{addingDevice=true;void begin();});

@@ -1,22 +1,9 @@
-## 1.9.4 — MusicPort sync (candidate)
-- Added separate multi-receiver MusicPort TCP service (38480) and LAN discovery (38481).
-- Added Devices → Add New Music Device and MusicPort receiver management.
-- Group music playback can include existing Fileport Android; each receiver grants per-track consent.
-- Scheduled playback with clock offset estimates; final physical-device synchronization testing remains required.
-- Prevent skipped files in multi-file queues and limit repeated failures.
-- Preserve original two-peer FPTP/1 file transport.
-
 # Fileport PC — Changelog
 
-The historical version-specific README files were consolidated here on 18 October 2026. These entries describe past source milestones, not a guarantee that each historical binary was publicly released.
-
-## v1.9.3 — 18 October 2026 (development build)
-
-- Added Music tab with **Music Share** file picker and explicit Android accept/decline before any music file bytes are sent.
-- Reused authenticated encrypted FPTP file transfers, with Android native MediaPlayer reading the verified local Downloads URI.
-- Added two-device Play/Stop controls using a shared LAN command with a 1.6-second playback lead time.
-- Added regression coverage for consent gating, verified file readiness and player control.
-- Playback sync is approximate; real Windows/Android latency tests remain necessary.
+## v1.9.5 — 19 October 2026
+- Removed all playback, music-only networking, device management and UI from Fileport PC.
+- Preserved encrypted one-to-one file transfer, text chat, reconnection and updater.
+- Clarified safe publisher identity requirements for automatic updates.
 
 ## v1.9.2 — 18 October 2026 (source build)
 
