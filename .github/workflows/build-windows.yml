@@ -1,6 +1,7 @@
 name: Build Fileport Windows EXE
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       publish_release:
