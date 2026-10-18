@@ -12,7 +12,7 @@
  const trusted=()=>local.readTrusted();
  const language=()=>window.FileportI18n?.language==='tr';
  const txt=(tr,en)=>language()?tr:en;
- function choose(view){frame.dataset.view=view;tabs.forEach(b=>b.classList.toggle('active',b.dataset.view===view));const about=$('desktopAbout');if(about)about.hidden=view!=='about';}
+ function choose(view){frame.dataset.view=view;tabs.forEach(b=>b.classList.toggle('active',b.dataset.view===view));const about=$('desktopAbout');if(about)about.hidden=view!=='about';render();}
  tabs.forEach(button=>button.addEventListener('click',()=>choose(button.dataset.view)));
  function recentPhones(){
   const now=Date.now();return [...nearby.values()].filter(d=>now-d.lastSeen<12000);
@@ -39,7 +39,7 @@
   }
  }
  function render(){
-  const first=!trusted().length||addingDevice;
+  const first=(!trusted().length||addingDevice)&&!['devices','music'].includes(frame.dataset.view);
   setup.classList.toggle('hidden',!first);
   reconnect.classList.toggle('hidden',first||online);
   welcome.classList.toggle('hidden',started);
@@ -108,6 +108,7 @@
  window.addEventListener('fileport-connection-error',()=>{if(!online)render();});
  window.addEventListener('fileport-trusted-updated',render);
  $('desktopStart').addEventListener('click',()=>void begin());
+ $('desktopMusicOnly')?.addEventListener('click',()=>{started=false;addingDevice=false;choose('devices');$('musicPortHelp').hidden=false;});
  $('desktopRetryWaiting').addEventListener('click',()=>{showDevices();void window.FileportConnection.host();});
  $('desktopCancel').addEventListener('click',()=>{cancelRequest();started=false;addingDevice=false;render();});
  $('desktopAddDevice').addEventListener('click',()=>{addingDevice=true;void begin();});

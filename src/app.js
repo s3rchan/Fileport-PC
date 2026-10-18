@@ -30,6 +30,7 @@
  let session=null,selected=[],sending=false,incoming=null,currentOutgoing=null;
  let sendWait=null,ackWait=null,receiptWait=null,retryTimer=null,heartbeat=null,closing=false;
  let filesPending=[];
+ let retries=0;
  let musicOutgoingId=null;
  const recentIdsKey='fileport-fptp-resume-v1';
  function setTransferActive(value){window.FileportTransferActive=!!value;if(ANDROID)window.FileportNative.setTransferActive(!!value);}
@@ -211,7 +212,7 @@
   if(p.t==='ping'){await sendPacket({t:'pong'});return;}
   if(p.t==='pong')return;
   if(p.t==='text'){if(typeof p.text==='string'&&p.text.length<=2000)window.FileportFlow?.incomingText(p.text);return;}
-  if(['music-offer','music-accept','music-decline','music-ready','music-error','music-play','music-stop'].includes(p.t)){
+  if(['music-offer','music-accept','music-decline','music-ready','music-error','music-play','music-stop','music-pause','music-clock-ping','music-clock-pong'].includes(p.t)){
    await window.FileportMusic?.handlePacket?.(p);return;
   }
   if(p.t==='file-start'){
@@ -277,7 +278,7 @@
   if(sending||!session?.verified||!batch.length)return;
   sending=true;filesPending=batch.slice();setTransferActive(true);refreshSend();ui.progress.classList.remove('hidden');
   try{
-   for(const file of filesPending){
+   for(const file of [...filesPending]){
     if(file.size>MAX_FILE)throw Error('File exceeds 1 GB');
     const id=musicOutgoingId||transferId(file),isMusic=musicOutgoingId===id;
     const cardId=window.FileportFlow?.transferBegin('send',safeName(file.name),readable(file.size));
@@ -306,13 +307,14 @@
     window.FileportFlow?.transferFinish(cardId,true);
     if(isMusic){musicOutgoingId=null;window.FileportMusic?.fileSent?.(id);}
     else removeTransferId(file);
-    currentOutgoing=null;filesPending.shift();
+    currentOutgoing=null;filesPending.shift();retries=0;
    }
-   selected=[];filesPending=[];ui.input.value='';setFiles([]);toast('All files saved on receiving device');
+   selected=[];filesPending=[];retries=0;ui.input.value='';setFiles([]);toast('All files saved on receiving device');
    ui.progressValue.textContent='100%';ui.progressFill.style.width='100%';
    setTimeout(()=>ui.progress.classList.add('hidden'),3000);
   }catch(error){
    status('Transfer paused: '+error.message,true);
+   retries++;if(retries>=3||/disk|write|permission|space|SHA-256|rejected|invalid|unsupported/i.test(String(error.message))){filesPending=[];status('Transfer stopped after errors: '+error.message,true);}
    if(currentOutgoing)window.FileportFlow?.transferPause?.(currentOutgoing.cardId);
    // Keep File objects and stable transfer IDs to continue after reconnect.
   }finally{sending=false;setTransferActive(!!incoming);refreshSend();

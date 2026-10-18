@@ -2,7 +2,7 @@
 
 **Fileport** connects your Windows PC directly to your Android phone for local file sharing and chat. It uses the same reachable Wi-Fi / LAN, not a cloud server.
 
-**Source version:** v1.9.3 (development build; a source build is not automatically a published Release).
+**Source version:** v1.9.4 (development build; a source build is not automatically a published Release).
 
 **Android companion:** [Fileport Android](https://github.com/s3rchan/Fileport-Android)  
 **Windows downloads:** [Official GitHub Releases](https://github.com/s3rchan/Fileport-PC/releases)  
