@@ -12,12 +12,14 @@
  const trusted=()=>local.readTrusted();
  const language=()=>window.FileportI18n?.language==='tr';
  const txt=(tr,en)=>language()?tr:en;
- function choose(view){frame.dataset.view=view;tabs.forEach(b=>b.classList.toggle('active',b.dataset.view===view));}
+ function choose(view){frame.dataset.view=view;tabs.forEach(b=>b.classList.toggle('active',b.dataset.view===view));const about=$('desktopAbout');if(about)about.hidden=view!=='about';}
  tabs.forEach(button=>button.addEventListener('click',()=>choose(button.dataset.view)));
  function recentPhones(){
   const now=Date.now();return [...nearby.values()].filter(d=>now-d.lastSeen<12000);
  }
  function showDevices(){
+  // Bound the discovery cache even after long-running LAN sessions.
+  const now=Date.now();for(const [id,phone] of nearby)if(now-phone.lastSeen>45000)nearby.delete(id);
   const list=$('desktopNearbyPhones');list.replaceChildren();
   for(const phone of recentPhones()){
    if(trusted().some(p=>p.id===phone.id))continue;
@@ -83,7 +85,7 @@
   if(attempt!==a)return;
   const status=txt('60 saniye boyunca bağlantı isteği gönderiliyor…','Sending connection request for 60 seconds…');
   $('pcReconnectInfo').textContent=status;$('desktopPairCode').textContent=status;
-  a.timer=setInterval(()=>void pulse(a),2500);void pulse(a);
+  a.timer=setInterval(()=>void pulse(a),3000);void pulse(a);
   a.deadline=setTimeout(()=>cancelRequest(txt('Süre doldu. Tekrar Bağlan’a basın.','Request timed out. Press Connect to try again.')),60000);
   render();
  }
