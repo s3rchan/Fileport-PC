@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tauri dev",
     "build": "tauri build",
-    "test": "node tests/fptp.integration.test.cjs && node tests/lan-request.test.cjs && node tests/pc-request.test.cjs && node tests/github-updater.test.cjs",
+    "test": "node tests/fptp.integration.test.cjs && node tests/lan-request.test.cjs && node tests/pc-request.test.cjs && node tests/github-updater.test.cjs && node tests/music.test.cjs",
     "icons": "python scripts/generate_brand_icons.py"
   },
   "devDependencies": {
