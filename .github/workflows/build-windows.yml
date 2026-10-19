@@ -53,8 +53,19 @@ jobs:
         run: python scripts/bump_version.py --check
       - name: Run protocol tests
         run: npm test
+      - name: Generate Rust dependency lockfile when absent
+        shell: pwsh
+        run: |
+          if (!(Test-Path src-tauri/Cargo.lock)) { cargo generate-lockfile --manifest-path src-tauri/Cargo.toml; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }
       - name: Run Rust unit tests
-        run: cargo test --manifest-path src-tauri/Cargo.toml
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked
+      - name: Upload generated Rust lockfile for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: Fileport-Rust-Cargo-lock
+          path: src-tauri/Cargo.lock
+          if-no-files-found: error
+          retention-days: 14
       - name: Build NSIS installer
         run: npm run build -- --bundles nsis
       - name: Upload Windows installer
