@@ -34,7 +34,7 @@ fn begin_download(filename:String,size:u64,transfer_id:String,state:State<'_,Tra
  let descriptor=format!("{size}\n{name}");
  let good=fs::read_to_string(&meta).ok().as_deref()==Some(&descriptor);
  if !good {let _=fs::remove_file(&part);fs::write(&meta,&descriptor).map_err(|e|e.to_string())?;}
- let existing=fs::metadata(&part).map(|m|m.len()).unwrap_or(0);
+ let existing=match fs::metadata(&part){Ok(info)=>info.len(),Err(e) if e.kind()==std::io::ErrorKind::NotFound=>0,Err(e)=>return Err(format!("Cannot inspect partial transfer: {e}"))};
  if existing>size{return Err("Partial transfer larger than announced size".into());}
  let file=OpenOptions::new().create(true).append(true).read(true).open(&part).map_err(|e|e.to_string())?;
  files.insert(transfer_id,FileTransfer{file,part,meta,expected:size,written:existing,name});Ok(existing)
@@ -67,6 +67,7 @@ fn finish_download(transfer_id:String,state:State<'_,Transfers>)->Result<String,
  let (stem,extension)=match item.name.rsplit_once('.') {Some((a,b)) if !a.is_empty()=> (a.to_string(),format!(".{b}")),_=>(item.name.clone(),String::new())};
  let mut destination=folder.join(&item.name);
  for n in 1..=10000 {if !destination.exists(){break;}destination=folder.join(format!("{stem} ({n}){extension}"));}
+ if destination.exists(){return Err("No available destination filename".into());}
  // The partial path is on the same local machine but possibly a different volume.
  match fs::rename(&item.part,&destination){Ok(())=>{},Err(_)=>{
    // Use create_new so an existing unrelated file is never overwritten.
