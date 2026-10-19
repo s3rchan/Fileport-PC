@@ -206,3 +206,35 @@ pub fn run(){
  .invoke_handler(tauri::generate_handler![begin_download,append_download,sync_download,verify_download,finish_download,pause_download,abort_download,notify_received,transport_send,transport_close,github_update::check_github_update,github_update::install_github_update,send_phone_request,windows_device_name])
  .run(tauri::generate_context!()).expect("Fileport startup failed");
 }
+
+#[cfg(test)]
+mod security_tests {
+ use super::*;
+
+ #[test]
+ fn transfer_ids_require_exact_hex_length() {
+  assert!(valid_id("0123456789abcdef0123456789ABCDEF"));
+  assert!(!valid_id("0123456789abcdef0123456789abcde"));
+  assert!(!valid_id("0123456789abcdef0123456789abcdef0"));
+  assert!(!valid_id("0123456789abcdef0123456789abcdeg"));
+  assert!(!valid_id("../../../../outside"));
+ }
+
+ #[test]
+ fn filenames_strip_path_separators_and_controls() {
+  assert_eq!(safe_name("../evil\\name.txt"), "_evil_name.txt");
+  assert_eq!(safe_name("  report.txt. "), "report.txt");
+  assert_eq!(safe_name("a\u{0000}b"), "a_b");
+  assert!(safe_name("...").is_empty());
+  assert!(safe_name(&"x".repeat(200)).chars().count()<=150);
+ }
+
+ #[test]
+ fn only_private_or_link_local_ips_are_accepted() {
+  assert!(is_local_ip("192.168.1.10".parse().unwrap()));
+  assert!(is_local_ip("169.254.1.10".parse().unwrap()));
+  assert!(!is_local_ip("8.8.8.8".parse().unwrap()));
+  assert!(!is_local_ip("127.0.0.1".parse().unwrap()));
+  assert!(!is_local_ip("::1".parse().unwrap()));
+ }
+}
