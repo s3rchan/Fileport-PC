@@ -54,7 +54,7 @@ jobs:
       - name: Run protocol tests
         run: npm test
       - name: Run Rust unit tests
-        run: cargo test --manifest-path src-tauri/Cargo.toml --locked
+        run: cargo test --manifest-path src-tauri/Cargo.toml
       - name: Build NSIS installer
         run: npm run build -- --bundles nsis
       - name: Upload Windows installer
