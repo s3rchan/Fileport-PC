@@ -53,6 +53,8 @@ jobs:
         run: python scripts/bump_version.py --check
       - name: Run protocol tests
         run: npm test
+      - name: Run Rust unit tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked
       - name: Build NSIS installer
         run: npm run build -- --bundles nsis
       - name: Upload Windows installer
