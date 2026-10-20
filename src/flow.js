@@ -26,7 +26,6 @@
   function restoreFileBubble(item){const id=transferBegin(item.direction,item.name,item.size);transferFinish(id,true,'',false);const t=panel.lastElementChild;if(t?.classList.contains('flow-bubble')){const meta=t.querySelector('.flow-meta');if(meta)meta.textContent=(item.direction==='send'?'You · ':peer+' · ')+new Date(item.time).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});}}
   const restored=[...textHistory.map(item=>({...item,kind:'text'})),...fileHistory.map(item=>({...item,kind:'file'}))].sort((a,b)=>a.time-b.time);
   // Restore text and completed file records in their original chronological order.
-  for(const item of restored){if(item.kind==='text')message(item.text,item.mine,'text',null,null,item.time,item.peer);else restoreFileBubble(item);}
   const localized = english => window.FileportI18n?.t(english) || english;
   // Active transfer bubbles are independent of message history and update without duplicates.
   const activeTransfers=new Map();const pausedTransfers=new Map();let transferSequence=0;
@@ -73,6 +72,7 @@
   btnFiles.addEventListener('click',()=>{if(!byId('sendFiles').disabled)byId('sendFiles').click();else system('Select a file and check the connection.');});
   byId('flowSaveDevice').addEventListener('click',()=>{const name=nameField.value.trim().slice(0,32)||'My device';localStorage.setItem(deviceKey,name);nameField.value=name;system('Device name saved: '+name);});
   byId('flowClearHistory').addEventListener('click',()=>{if(!confirm('Clear local Fileport history?'))return;history=[];textHistory=[];fileHistory=[];try{localStorage.removeItem(textKey);localStorage.removeItem(fileKey);}catch{}panel.replaceChildren();save();system('Local history cleared.');});
+  for(const item of restored){if(item.kind==='text')message(item.text,item.mine,'text',null,null,item.time,item.peer);else restoreFileBubble(item);}
   renderRecent();online(false);
   window.FileportFlow={
     deviceName(){return (nameField.value.trim()||'My device').slice(0,32);},
