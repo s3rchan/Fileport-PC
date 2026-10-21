@@ -2,7 +2,7 @@
 
 **Fileport** connects your Windows PC directly to your Android phone for local file sharing and chat. It uses the same reachable Wi-Fi / LAN, not a cloud server.
 
-**Source version:** v1.9.6 (development build; a source build is not automatically a published Release).
+**Source version:** v2.0.0 (development build; a source build is not automatically a published Release).
 
 **Android companion:** [Fileport Android](https://github.com/s3rchan/Fileport-Android)  
 **Windows downloads:** [Official GitHub Releases](https://github.com/s3rchan/Fileport-PC/releases)  
@@ -84,3 +84,7 @@ In-app updates download GitHub Releases. The Windows publisher signature must re
 - Reuse paused file-transfer bubbles after network interruptions.
 - Maintain existing Fileport application identity and local history storage keys for continuity.
 - Windows NSIS installer is built and tested by GitHub Actions before publication.
+
+## Final release
+
+Fileport PC v2.0.0 is the final planned release. The in-app GitHub update feature has been removed; the application continues to operate over local LAN without update checks.
