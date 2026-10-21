@@ -10,7 +10,7 @@ for(const p of ['src/index.html','src/desktop.js','src/i18n.js','src/brand-v19.c
 }
 assert.match(read('src/app.js'),/Unsupported file metadata/);
 assert.doesNotMatch(read('src/app.js'),/FileportMusicTransport|sendMusic\(/);
-assert.match(read('src-tauri/src/github_update.rs'),/SignerCertificate\.Thumbprint/);
-assert.match(read('package.json'),/"version": "1.9.6"/);
+assert.doesNotMatch(read('src-tauri/src/lib.rs'),/github_update/);
+assert.match(read('package.json'),/"version": "2.0.0"/);
 assert.match(read('README.md'),/Source version:\*\* v1\.9\.6/);
 console.log('File-only Windows regression checks passed');
