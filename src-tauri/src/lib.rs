@@ -34,7 +34,7 @@ fn begin_download(filename:String,size:u64,transfer_id:String,state:State<'_,Tra
  let descriptor=format!("{size}\n{name}");
  let good=fs::read_to_string(&meta).ok().as_deref()==Some(&descriptor);
  if !good {let _=fs::remove_file(&part);fs::write(&meta,&descriptor).map_err(|e|e.to_string())?;}
- let existing=fs::metadata(&part).map(|m|m.len()).unwrap_or(0);
+ let existing=match fs::metadata(&part){Ok(info)=>info.len(),Err(e) if e.kind()==std::io::ErrorKind::NotFound=>0,Err(e)=>return Err(format!("Cannot inspect partial transfer: {e}"))};
  if existing>size{return Err("Partial transfer larger than announced size".into());}
  let file=OpenOptions::new().create(true).append(true).read(true).open(&part).map_err(|e|e.to_string())?;
  files.insert(transfer_id,FileTransfer{file,part,meta,expected:size,written:existing,name});Ok(existing)
@@ -67,6 +67,7 @@ fn finish_download(transfer_id:String,state:State<'_,Transfers>)->Result<String,
  let (stem,extension)=match item.name.rsplit_once('.') {Some((a,b)) if !a.is_empty()=> (a.to_string(),format!(".{b}")),_=>(item.name.clone(),String::new())};
  let mut destination=folder.join(&item.name);
  for n in 1..=10000 {if !destination.exists(){break;}destination=folder.join(format!("{stem} ({n}){extension}"));}
+ if destination.exists(){return Err("No available destination filename".into());}
  // The partial path is on the same local machine but possibly a different volume.
  match fs::rename(&item.part,&destination){Ok(())=>{},Err(_)=>{
    // Use create_new so an existing unrelated file is never overwritten.
@@ -204,4 +205,36 @@ pub fn run(){
  .setup(move|app|{tcp_server(app.handle().clone(),active.clone(),counter.clone());lan_phone_listener(app.handle().clone());Ok(())})
  .invoke_handler(tauri::generate_handler![begin_download,append_download,sync_download,verify_download,finish_download,pause_download,abort_download,notify_received,transport_send,transport_close,github_update::check_github_update,github_update::install_github_update,send_phone_request,windows_device_name])
  .run(tauri::generate_context!()).expect("Fileport startup failed");
+}
+
+#[cfg(test)]
+mod security_tests {
+ use super::*;
+
+ #[test]
+ fn transfer_ids_require_exact_hex_length() {
+  assert!(valid_id("0123456789abcdef0123456789ABCDEF"));
+  assert!(!valid_id("0123456789abcdef0123456789abcde"));
+  assert!(!valid_id("0123456789abcdef0123456789abcdef0"));
+  assert!(!valid_id("0123456789abcdef0123456789abcdeg"));
+  assert!(!valid_id("../../../../outside"));
+ }
+
+ #[test]
+ fn filenames_strip_path_separators_and_controls() {
+  assert_eq!(safe_name("../evil\\name.txt"), "_evil_name.txt");
+  assert_eq!(safe_name("  report.txt. "), "report.txt");
+  assert_eq!(safe_name("a\u{0000}b"), "a_b");
+  assert!(safe_name("...").is_empty());
+  assert!(safe_name(&"x".repeat(200)).chars().count()<=150);
+ }
+
+ #[test]
+ fn only_private_or_link_local_ips_are_accepted() {
+  assert!(is_local_ip("192.168.1.10".parse().unwrap()));
+  assert!(is_local_ip("169.254.1.10".parse().unwrap()));
+  assert!(!is_local_ip("8.8.8.8".parse().unwrap()));
+  assert!(!is_local_ip("127.0.0.1".parse().unwrap()));
+  assert!(!is_local_ip("::1".parse().unwrap()));
+ }
 }
