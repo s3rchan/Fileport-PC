@@ -77,3 +77,10 @@ FPTP/1 is a custom encrypted application protocol, **not an independently audite
 ## Update signing
 
 In-app updates download GitHub Releases. The Windows publisher signature must remain stable across signed releases; a differently signed existing installation cannot be updated by bypassing this check. Use a one-time manual migration only after backing up existing data when a signer changes.
+
+## Release notes — v1.9.6
+
+- Preserve local text messages and completed file-transfer bubbles across restarts.
+- Reuse paused file-transfer bubbles after network interruptions.
+- Maintain existing Fileport application identity and local history storage keys for continuity.
+- Windows NSIS installer is built and tested by GitHub Actions before publication.
